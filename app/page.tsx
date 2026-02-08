@@ -3,18 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-// Dummy image URLs - Using professional photography images
+// Local image URLs from public/images folder
 const CAROUSEL_IMAGES = [
-  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1537633552985-caf2b95f7f60?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1465056836917-7d440af63f23?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1551798181-a3b34ce1981b?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1465146072230-91cabc968266?w=1200&h=800&fit=crop',
+  '/images/wed.jpeg',
 ];
 
 export default function Home() {
@@ -91,47 +82,26 @@ export default function Home() {
       {/* Hero Section with Carousel Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
         {/* Carousel Background Images */}
-        <div className="absolute inset-0 z-0">
-          {CAROUSEL_IMAGES.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{
-                backgroundImage: `url('${image}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            />
-          ))}
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        </div>
+        {CAROUSEL_IMAGES.map((image, index) => (
+          <img
+            key={index}
+            src={image}
+            alt={`Carousel ${index + 1}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
 
         {/* Content */}
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight">
-            Capture Your
-            <span className="block text-amber-500 mt-2">Precious Moments</span>
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center w-full px-6">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-widest text-white">
+            K A R T H I K F R A M E S
+            <span className="block text-amber-500 mt-4 text-4xl">Clicks</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Professional photography and videography for weddings, events, and special occasions.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/dashboard/gallery"
-              className="bg-amber-600 hover:bg-amber-700 px-8 py-4 rounded text-lg font-semibold transition transform hover:scale-105 uppercase tracking-wide"
-            >
-              View Gallery
-            </Link>
-            <Link
-              href="/auth/login"
-              className="border-2 border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-black px-8 py-4 rounded text-lg font-semibold transition uppercase tracking-wide"
-            >
-              Upload Media
-            </Link>
-          </div>
         </div>
 
         {/* Image Counter Dots */}
@@ -196,76 +166,258 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="py-20 relative">
+      {/* Services Section - What We Do */}
+      <section id="services" className="py-20 bg-gray-950 relative">
+        <style>{`
+          /* Wedding Animation - Rotating */
+          @keyframes weddingRotate {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(360deg); }
+          }
+          
+          /* Baby Animation - Gentle Float */
+          @keyframes babyFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+          }
+          
+          /* Celebration Animation - Bounce */
+          @keyframes celebrationBounce {
+            0%, 100% { transform: translateY(0px); }
+            25% { transform: translateY(-20px); }
+            50% { transform: translateY(0px); }
+            75% { transform: translateY(-10px); }
+          }
+          
+          /* Corporate Animation - Pulse */
+          @keyframes corporatePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+          }
+          
+          /* Apply animations on hover */
+          .wedding-animation:hover .service-icon {
+            animation: weddingRotate 1.2s ease-in-out infinite;
+          }
+          
+          .baby-animation:hover .service-icon {
+            animation: babyFloat 1s ease-in-out infinite;
+          }
+          
+          .celebration-animation:hover .service-icon {
+            animation: celebrationBounce 1.2s ease-in-out infinite;
+          }
+          
+          .corporate-animation:hover .service-icon {
+            animation: corporatePulse 0.8s ease-in-out infinite;
+          }
+          
+          .service-card {
+            position: relative;
+            transition: all 0.3s ease;
+          }
+          .service-card:hover .service-box {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
+            box-shadow: 0 0 30px rgba(20, 184, 166, 0.5), inset 0 0 30px rgba(20, 184, 166, 0.1);
+            border: 1px solid rgba(20, 184, 166, 0.5);
+          }
+          .service-card:hover .service-icon {
+            filter: brightness(1.3) drop-shadow(0 0 10px rgba(20, 184, 166, 0.8));
+          }
+        `}</style>
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 uppercase tracking-wide">
-            Our Services
+            What We Do?
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            {/* Service 1 */}
-            <div className="group relative overflow-hidden rounded-lg h-80 bg-gray-900 cursor-pointer">
-              <div className="w-full h-full bg-gradient-to-br from-amber-900 to-black flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-6xl mb-4">💍</p>
-                  <p className="text-gray-300 font-semibold">Wedding Photography</p>
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {/* Weddings - Rotating Animation */}
+            <div className="service-card wedding-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/pht2.png" alt="Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
               </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
-                <Link
-                  href="/dashboard/gallery"
-                  className="opacity-0 group-hover:opacity-100 bg-amber-600 px-6 py-3 rounded font-semibold transition"
-                >
-                  View Portfolio
-                </Link>
-              </div>
+              <p className="text-white font-semibold">Weddings</p>
             </div>
 
-            {/* Service 2 */}
-            <div className="group relative overflow-hidden rounded-lg h-80 bg-gray-900 cursor-pointer">
-              <div className="w-full h-full bg-gradient-to-br from-amber-900 to-black flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-6xl mb-4">🎉</p>
-                  <p className="text-gray-300 font-semibold">Event Coverage</p>
-                </div>
+            {/* Hamarlok Weddings - Rotating Animation */}
+            <div className="service-card wedding-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/hamarlok.png" alt="Hamarlok Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
               </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
-                <Link
-                  href="/dashboard/gallery"
-                  className="opacity-0 group-hover:opacity-100 bg-amber-600 px-6 py-3 rounded font-semibold transition"
-                >
-                  View Portfolio
-                </Link>
-              </div>
+              <p className="text-white font-semibold">Hamarlok Weddings</p>
             </div>
 
-            {/* Service 3 */}
-            <div className="group relative overflow-hidden rounded-lg h-80 bg-gray-900 cursor-pointer">
-              <div className="w-full h-full bg-gradient-to-br from-amber-900 to-black flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-6xl mb-4">🎥</p>
-                  <p className="text-gray-300 font-semibold">Videography</p>
-                </div>
+            {/* Engagement - Rotating Animation */}
+            <div className="service-card wedding-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/engagement-icon.jpg" alt="Engagement" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
               </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition flex items-center justify-center">
-                <Link
-                  href="/dashboard/gallery"
-                  className="opacity-0 group-hover:opacity-100 bg-amber-600 px-6 py-3 rounded font-semibold transition"
-                >
-                  View Portfolio
-                </Link>
+              <p className="text-white font-semibold">Engagement</p>
+            </div>
+
+            {/* Pre Weddings - Rotating Animation */}
+            <div className="service-card wedding-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/pre-wedding.png" alt="Pre Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
               </div>
+              <p className="text-white font-semibold">Pre Weddings</p>
+            </div>
+
+            {/* Maternity - Baby Float Animation */}
+            <div className="service-card baby-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/maternity.png" alt="Maternity" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Maternity</p>
+            </div>
+
+            {/* Baby Shower - Baby Float Animation */}
+            <div className="service-card baby-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/baby-shower.png" alt="Baby Shower" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Baby Shower</p>
+            </div>
+
+            {/* New Born - Baby Float Animation */}
+            <div className="service-card baby-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/newborn.png" alt="New Born" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">New Born</p>
+            </div>
+
+            {/* Baby Shoot - Baby Float Animation */}
+            <div className="service-card baby-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/baby_shoot.png" alt="Baby Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Baby Shoot</p>
+            </div>
+
+            {/* Birthday - Celebration Bounce Animation */}
+            <div className="service-card celebration-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/birthday.png" alt="Birthday" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Birthday</p>
+            </div>
+
+            {/* Naming Ceremony - Celebration Bounce Animation */}
+            <div className="service-card celebration-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/naming_cermony.png" alt="Naming Ceremony" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Naming Ceremony</p>
+            </div>
+
+            {/* House Warming - Celebration Bounce Animation */}
+            <div className="service-card celebration-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/house_warming.webp" alt="House Warming" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">House Warming</p>
+            </div>
+
+            {/* Portfolio Shoot - Corporate Pulse Animation */}
+            <div className="service-card corporate-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/portfolio.png" alt="Portfolio Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Portfolio Shoot</p>
+            </div>
+
+            {/* Product Shoot - Corporate Pulse Animation */}
+            <div className="service-card corporate-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/product_shoot.png" alt="Product Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Product Shoot</p>
+            </div>
+
+            {/* Corporate Events - Corporate Pulse Animation */}
+            <div className="service-card corporate-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/corporate_events.png" alt="Corporate Events" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Corporate Events</p>
+            </div>
+
+            {/* Car/Bike Shoot - Corporate Pulse Animation */}
+            <div className="service-card corporate-animation text-center">
+              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
+                <img src="https://photocrewpictures.com/pics/services/caricon.png" alt="Car/Bike Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+              </div>
+              <p className="text-white font-semibold">Car/Bike Shoot</p>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="text-center">
-            <Link
-              href="/dashboard/gallery"
-              className="bg-amber-600 hover:bg-amber-700 px-8 py-3 rounded text-lg font-semibold inline-block transition uppercase tracking-wide"
-            >
-              Explore All Services
-            </Link>
+      {/* Stats Section */}
+      <section className="relative py-24 bg-black overflow-hidden">
+        {/* Background Camera Image */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 overflow-hidden">
+          <img 
+            src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&h=600&fit=crop" 
+            alt="Camera Background" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            {/* Stat 1 - Weddings Covered */}
+            <div className="group">
+              <div className="mb-4 flex justify-center">
+                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                  📷
+                </div>
+              </div>
+              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+                50<span className="text-amber-500">+</span>
+              </h3>
+              <p className="text-gray-400 uppercase tracking-widest font-semibold">Weddings Covered</p>
+            </div>
+
+            {/* Stat 2 - Events Covered */}
+            <div className="group">
+              <div className="mb-4 flex justify-center">
+                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                  🎥
+                </div>
+              </div>
+              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+                30<span className="text-amber-500">+</span>
+              </h3>
+              <p className="text-gray-400 uppercase tracking-widest font-semibold">Events Covered</p>
+            </div>
+
+            {/* Stat 3 - Videos Edited */}
+            <div className="group">
+              <div className="mb-4 flex justify-center">
+                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                  📺
+                </div>
+              </div>
+              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+                100<span className="text-amber-500">+</span>
+              </h3>
+              <p className="text-gray-400 uppercase tracking-widest font-semibold">Videos Edited</p>
+            </div>
+
+            {/* Stat 4 - Happy Customers */}
+            <div className="group">
+              <div className="mb-4 flex justify-center">
+                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                  👥
+                </div>
+              </div>
+              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+                500<span className="text-amber-500">+</span>
+              </h3>
+              <p className="text-gray-400 uppercase tracking-widest font-semibold">Happy Customers</p>
+            </div>
           </div>
         </div>
       </section>
