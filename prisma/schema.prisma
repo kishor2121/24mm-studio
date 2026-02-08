@@ -37,6 +37,8 @@ model Video {
 model Review {
   id            Int        @id @default(autoincrement())
   content       String
+  name          String?    @default("Anonymous")
+  rating        Int        @default(5)
   imageId      Int?
   videoId      Int?
   createdAt     DateTime   @default(now())

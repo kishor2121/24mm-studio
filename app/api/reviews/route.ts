@@ -4,17 +4,18 @@ import prisma from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { content, imageId, videoId } = body;
+    const { content, name, text, rating, imageId, videoId } = body;
 
-    if (!content) {
+    // Support both old format (content, imageId, videoId) and new format (name, text)
+    const reviewContent = content || text;
+    const reviewerName = name || "Anonymous";
+    const reviewRating = Math.min(Math.max(parseInt(rating) || 5, 1), 5); // Ensure rating is between 1-5
+
+    if (!reviewContent) {
       return NextResponse.json({ message: "Review content is required" }, { status: 400 });
     }
 
-    if (!imageId && !videoId) {
-      return NextResponse.json({ message: "Either imageId or videoId is required" }, { status: 400 });
-    }
-
-    // Validate that the image or video exists
+    // Only validate image/video if provided
     if (imageId) {
       const image = await prisma.image.findUnique({ where: { id: imageId } });
       if (!image) {
@@ -29,10 +30,12 @@ export async function POST(req: Request) {
       }
     }
 
-    // Create the review
+    // Create the review (testimonial)
     const review = await prisma.review.create({
       data: {
-        content,
+        content: reviewContent,
+        name: reviewerName,
+        rating: reviewRating,
         imageId: imageId || null,
         videoId: videoId || null,
       },
@@ -65,7 +68,7 @@ export async function GET(req: Request) {
         orderBy: { createdAt: 'desc' },
       });
     } else {
-      // Get all reviews
+      // Get all reviews (both testimonials and media reviews)
       reviews = await prisma.review.findMany({
         orderBy: { createdAt: 'desc' },
       });
