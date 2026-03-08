@@ -4,7 +4,7 @@ import Link from 'next/link';
 import NextImage from 'next/image';
 import { useEffect, useState } from 'react';
 // icons for floating action buttons (WhatsApp & phone)
-import { FaWhatsapp, FaPhoneAlt, FaInstagram } from 'react-icons/fa';
+import { FaWhatsapp, FaPhoneAlt, FaInstagram, FaCamera } from 'react-icons/fa';
 
 // Add smooth scrolling styles
 const scrollbarStyles = `
@@ -272,6 +272,7 @@ export default function Home() {
   const backgroundImages = ['/homelogo/karthik.png', '/homelogo/24mm.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo2.jpg','/homelogo/homelogo3.jpg','/homelogo/homelogo4.jpg'];
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
+  const [displayedText, setDisplayedText] = useState('');
 
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
   
@@ -354,6 +355,21 @@ export default function Home() {
       const img = new Image();
       img.src = src;
     });
+  }, []);
+
+  // Typing animation for title
+  useEffect(() => {
+    const fullText = 'K A R T H I K   F R A M E S';
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < fullText.length) {
+        setDisplayedText(fullText.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 150);
+    return () => clearInterval(interval);
   }, []);
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -536,7 +552,9 @@ export default function Home() {
         {/* Content */}
         <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center w-full px-4 sm:px-6">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight" style={{ whiteSpace: 'nowrap' }}>
-            K A R T H I K F R A M E S
+            <span className="inline-flex items-center justify-center w-12 h-12 bg-amber-500 rounded-full mr-3 animate-bounce">
+              <FaCamera className="text-black text-xl" />
+            </span> {displayedText}<span className="animate-pulse text-amber-500">|</span>
             <span className="block text-amber-500 mt-2 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">Clicks</span>
           </h1>
         </div>
