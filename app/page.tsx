@@ -273,7 +273,7 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
 
-  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo3.jpg','/homelogo/homelogo2.jpg', '/homelogo/homelogo4.jpg', '/homelogo/homelogo7.jpg','/homelogo/homelogo5.jpg','homelogo6.jpg', '/homelogo/24mm.png'];
+  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo3.jpg','/homelogo/homelogo2.jpg', '/homelogo/homelogo4.jpg', '/homelogo/homelogo7.jpg','/homelogo/homelogo5.jpg','/homelogo/homelogo6.jpg', '/homelogo/24mm.png'];
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
   const [displayedText, setDisplayedText] = useState('');
@@ -547,6 +547,11 @@ export default function Home() {
           alt="Background"
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-2000"
           style={{ opacity: bgOpacity, animation: 'zoom 10s ease-in-out infinite' }}
+          onError={() => {
+            console.log('Background image failed to load:', backgroundImages[currentBgIndex]);
+            // Skip to next image if current fails
+            setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
+          }}
         />
 
         {/* Image Indicators */}
@@ -563,7 +568,7 @@ export default function Home() {
         
         {/* Content */}
         <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center w-full px-4 sm:px-6">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight" style={{ whiteSpace: 'nowrap' }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight">
             <span className="inline-flex items-center justify-center w-12 h-12 bg-amber-500 rounded-full mr-3 animate-bounce">
               <FaCamera className="text-black text-xl" />
             </span> {displayedText}
@@ -588,7 +593,7 @@ export default function Home() {
             Explore our latest photography and videography work
           </p>
 
-          <div className="grid grid-cols-3 gap-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
@@ -600,8 +605,8 @@ export default function Home() {
                   width={2000}
                   height={1333}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading={idx > 8 ? 'lazy' : 'eager'}
-                  priority={idx < 9}
+                  loading={idx > 5 ? 'lazy' : 'eager'}
+                  priority={idx < 3}
                   quality={100}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   unoptimized={false}
