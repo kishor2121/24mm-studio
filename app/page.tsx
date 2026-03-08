@@ -223,15 +223,66 @@ function TestimonialsSection() {
   );
 }
 
-// Local image URLs from public/images folder
-const CAROUSEL_IMAGES = [
-  '/images/wed.jpeg',
+// Fallback gallery images used when no uploads are available
+const DUMMY_GALLERY = [
+  { url: 'https://via.placeholder.com/600x400?text=Dummy+1' },
+  { url: 'https://via.placeholder.com/600x400?text=Dummy+2' },
+  { url: 'https://via.placeholder.com/600x400?text=Dummy+3' },
+];
+
+// Home show images
+const HOMESHOW_IMAGES = [
+  { url: '/homeshowimages/ammu.jpeg' },
+  { url: '/homeshowimages/ammu1.jpeg' },
+  { url: '/homeshowimages/mokshi.jpeg' },
+  { url: '/homeshowimages/mokshi1.jpeg' },
+  { url: '/homeshowimages/aray.jpeg' },
+  { url: '/homeshowimages/aray1.jpeg' },
+  { url: '/homeshowimages/tanuja.jpeg' },
+  { url: '/homeshowimages/tanuja1.jpeg' },
+  { url: '/homeshowimages/g.jpeg' },
 ];
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [images, setImages] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedService, setSelectedService] = useState('all');
+  const [selectedServiceType, setSelectedServiceType] = useState('all');
+
+  const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
+  
+  const serviceTypes = [
+    { name: 'Weddings', category: 'wedding' },
+    { name: 'Hamarlok Weddings', category: 'wedding' },
+    { name: 'Engagement', category: 'wedding' },
+    { name: 'Pre Weddings', category: 'wedding' },
+    { name: 'Maternity', category: 'baby' },
+    { name: 'Baby Shower', category: 'baby' },
+    { name: 'New Born', category: 'baby' },
+    { name: 'Baby Shoot', category: 'baby' },
+    { name: 'Birthday', category: 'celebration' },
+    { name: 'Naming Ceremony', category: 'celebration' },
+    { name: 'House Warming', category: 'celebration' },
+    { name: 'Portfolio Shoot', category: 'corporate' },
+    { name: 'Product Shoot', category: 'corporate' },
+    { name: 'Corporate Events', category: 'corporate' },
+    { name: 'Car/Bike Delivery Shoot', category: 'corporate' },
+  ];
+
+  const filteredServices = selectedServiceType === 'all' 
+    ? serviceTypes 
+    : serviceTypes.filter(s => s.category === selectedServiceType);
+
+  // determine which set of images to show in the gallery (now loading only 'home' images)
+  const filteredImages = images.filter(img => {
+    if (selectedService === 'all') return true;
+    return img.service === selectedService;
+  });
+  
+  const galleryImages = (filteredImages && filteredImages.length > 0) ? filteredImages : DUMMY_GALLERY;
+  const usingDefaultGallery = !(filteredImages && filteredImages.length > 0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -241,12 +292,27 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Change background image every 2 seconds
+  // Check if photographer is logged in
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
-    }, 2000);
-    return () => clearInterval(interval);
+    const photographer = localStorage.getItem('photographer');
+    setIsLoggedIn(!!photographer);
+  }, []);
+
+  // Fetch uploaded images from API and use the latest as the hero background
+  useEffect(() => {
+    let mounted = true;
+    async function loadImages() {
+      try {
+        const res = await fetch('/api/images?section=home');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (mounted && Array.isArray(data)) setImages(data);
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadImages();
+    return () => { mounted = false; };
   }, []);
 
   return (
@@ -257,7 +323,7 @@ export default function Home() {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <Link href="/" className="text-xl sm:text-2xl font-bold tracking-widest">
-            STUDIO 24MM
+            24mm STUDIO
           </Link>
           
           {/* Mobile Menu Button */}
@@ -296,18 +362,22 @@ export default function Home() {
             >
               Services
             </Link>
-            <Link 
-              href="/auth/login"
-              className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide"
-            >
-              Login
-            </Link>
-            <Link 
-              href="/dashboard/upload"
-              className="bg-amber-600 hover:bg-amber-700 px-4 lg:px-6 py-2 rounded transition text-xs lg:text-sm uppercase tracking-wide"
-            >
-              Upload
-            </Link>
+            {!isLoggedIn && (
+              <Link 
+                href="/auth/login"
+                className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide"
+              >
+                Login
+              </Link>
+            )}
+            {isLoggedIn && (
+              <Link 
+                href="/dashboard/upload"
+                className="bg-amber-600 hover:bg-amber-700 px-4 lg:px-6 py-2 rounded transition text-xs lg:text-sm uppercase tracking-wide"
+              >
+                Upload
+              </Link>
+            )}
           </div>
         </div>
         
@@ -327,56 +397,38 @@ export default function Home() {
               <Link href="#services" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
                 Services
               </Link>
-              <Link href="/auth/login" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
-                Login
-              </Link>
-              <Link href="/dashboard/upload" className="block bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded transition text-sm uppercase tracking-wide">
-                Upload
-              </Link>
+              {!isLoggedIn && (
+                <Link href="/auth/login" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
+                  Login
+                </Link>
+              )}
+              {isLoggedIn && (
+                <Link href="/dashboard/upload" className="block bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded transition text-sm uppercase tracking-wide">
+                  Upload
+                </Link>
+              )}
             </div>
           </div>
         )}
       </nav>
 
-      {/* Hero Section with Carousel Background */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 sm:px-6">
-        {/* Carousel Background Images */}
-        {CAROUSEL_IMAGES.map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt={`Carousel ${index + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-        ))}
+      {/* Hero Section */}
+      <section 
+        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 sm:px-6"
+        style={{
+          backgroundImage: 'url(/homelogo/karthik.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
-
         {/* Content */}
         <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center w-full px-4 sm:px-6">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest text-white leading-tight">
             K A R T H I K F R A M E S
             <span className="block text-amber-500 mt-2 sm:mt-4 text-2xl sm:text-3xl md:text-4xl">Clicks</span>
           </h1>
-        </div>
-
-        {/* Image Counter Dots */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {CAROUSEL_IMAGES.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`h-2 rounded-full transition ${
-                index === currentImageIndex
-                  ? 'bg-amber-500 w-8'
-                  : 'bg-white bg-opacity-50 w-2 hover:bg-opacity-100'
-              }`}
-              aria-label={`Go to image ${index + 1}`}
-            />
-          ))}
         </div>
 
         {/* Scroll Indicator */}
@@ -387,11 +439,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gallery Grid Section - Show all uploaded images (or fallbacks) */}
+      <section className="py-12 sm:py-20 bg-black relative">
+        <div className="w-full px-0">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-2 uppercase tracking-wide text-white">
+          </h2>
+          <p className="text-center text-gray-400 mb-8 text-lg">
+            Explore our latest photography and videography work
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
+            {HOMESHOW_IMAGES.map((image, idx) => (
+              <div
+                key={idx}
+                className="group relative overflow-hidden cursor-pointer"
+              >
+                <img
+                  src={image.url}
+                  alt={`Gallery ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-12 sm:py-20 bg-gray-950 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-16 uppercase tracking-wide">
-            Why Choose Studio 24MM?
+            Why Choose 24mm STUDIO?
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
@@ -421,6 +499,26 @@ export default function Home() {
                 Share your thoughts and read reviews from other visitors about our work.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Secondary gallery/dummy section requested by user */}
+      <section className="py-12 sm:py-20 bg-gray-950 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            {DUMMY_GALLERY.map((image, idx) => (
+              <div
+                key={idx}
+                className="group relative overflow-hidden rounded-lg h-64 sm:h-72 md:h-80 cursor-pointer"
+              >
+                <img
+                  src={image.url}
+                  alt={`Dummy ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -489,126 +587,114 @@ export default function Home() {
             What We Do?
           </h2>
 
+          {/* Service Category Filter */}
+          <div className="flex flex-wrap gap-2 justify-center mb-12">
+            <button
+              onClick={() => setSelectedServiceType('all')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
+                selectedServiceType === 'all'
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              All Services
+            </button>
+            <button
+              onClick={() => setSelectedServiceType('wedding')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
+                selectedServiceType === 'wedding'
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Wedding Services
+            </button>
+            <button
+              onClick={() => setSelectedServiceType('baby')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
+                selectedServiceType === 'baby'
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Baby Services
+            </button>
+            <button
+              onClick={() => setSelectedServiceType('celebration')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
+                selectedServiceType === 'celebration'
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Celebrations
+            </button>
+            <button
+              onClick={() => setSelectedServiceType('corporate')}
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
+                selectedServiceType === 'corporate'
+                  ? 'bg-amber-500 text-black'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Corporate & Portfolio
+            </button>
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            {/* Weddings - Rotating Animation */}
-            <div className="service-card wedding-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/pht2.png" alt="Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Weddings</p>
-            </div>
+            {filteredServices.map((service, idx) => {
+              const serviceIcons: Record<string, string> = {
+                'Weddings': 'https://photocrewpictures.com/pics/services/pht2.png',
+                'Hamarlok Weddings': 'https://photocrewpictures.com/pics/services/hamarlok.png',
+                'Engagement': 'https://photocrewpictures.com/pics/services/engagement-icon.jpg',
+                'Pre Weddings': 'https://photocrewpictures.com/pics/services/pre-wedding.png',
+                'Maternity': 'https://photocrewpictures.com/pics/services/maternity.png',
+                'Baby Shower': 'https://photocrewpictures.com/pics/services/baby-shower.png',
+                'New Born': 'https://photocrewpictures.com/pics/services/newborn.png',
+                'Baby Shoot': 'https://photocrewpictures.com/pics/services/baby_shoot.png',
+                'Birthday': 'https://photocrewpictures.com/pics/services/birthday.png',
+                'Naming Ceremony': 'https://photocrewpictures.com/pics/services/naming_cermony.png',
+                'House Warming': 'https://photocrewpictures.com/pics/services/house_warming.webp',
+                'Portfolio Shoot': 'https://photocrewpictures.com/pics/services/portfolio.png',
+                'Product Shoot': 'https://photocrewpictures.com/pics/services/product_shoot.png',
+                'Corporate Events': 'https://photocrewpictures.com/pics/services/corporate_events.png',
+                'Car/Bike Delivery Shoot': 'https://photocrewpictures.com/pics/services/caricon.png',
+              };
 
-            {/* Hamarlok Weddings - Rotating Animation */}
-            <div className="service-card wedding-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/hamarlok.png" alt="Hamarlok Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Hamarlok Weddings</p>
-            </div>
+              const animationClass = service.category === 'wedding' ? 'wedding-animation' 
+                : service.category === 'baby' ? 'baby-animation' 
+                : service.category === 'celebration' ? 'celebration-animation' 
+                : 'corporate-animation';
 
-            {/* Engagement - Rotating Animation */}
-            <div className="service-card wedding-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/engagement-icon.jpg" alt="Engagement" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Engagement</p>
-            </div>
-
-            {/* Pre Weddings - Rotating Animation */}
-            <div className="service-card wedding-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/pre-wedding.png" alt="Pre Weddings" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Pre Weddings</p>
-            </div>
-
-            {/* Maternity - Baby Float Animation */}
-            <div className="service-card baby-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/maternity.png" alt="Maternity" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Maternity</p>
-            </div>
-
-            {/* Baby Shower - Baby Float Animation */}
-            <div className="service-card baby-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/baby-shower.png" alt="Baby Shower" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Baby Shower</p>
-            </div>
-
-            {/* New Born - Baby Float Animation */}
-            <div className="service-card baby-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/newborn.png" alt="New Born" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">New Born</p>
-            </div>
-
-            {/* Baby Shoot - Baby Float Animation */}
-            <div className="service-card baby-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/baby_shoot.png" alt="Baby Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Baby Shoot</p>
-            </div>
-
-            {/* Birthday - Celebration Bounce Animation */}
-            <div className="service-card celebration-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/birthday.png" alt="Birthday" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Birthday</p>
-            </div>
-
-            {/* Naming Ceremony - Celebration Bounce Animation */}
-            <div className="service-card celebration-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/naming_cermony.png" alt="Naming Ceremony" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Naming Ceremony</p>
-            </div>
-
-            {/* House Warming - Celebration Bounce Animation */}
-            <div className="service-card celebration-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/house_warming.webp" alt="House Warming" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">House Warming</p>
-            </div>
-
-            {/* Portfolio Shoot - Corporate Pulse Animation */}
-            <div className="service-card corporate-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/portfolio.png" alt="Portfolio Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Portfolio Shoot</p>
-            </div>
-
-            {/* Product Shoot - Corporate Pulse Animation */}
-            <div className="service-card corporate-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/product_shoot.png" alt="Product Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Product Shoot</p>
-            </div>
-
-            {/* Corporate Events - Corporate Pulse Animation */}
-            <div className="service-card corporate-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/corporate_events.png" alt="Corporate Events" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Corporate Events</p>
-            </div>
-
-            {/* Car/Bike Shoot - Corporate Pulse Animation */}
-            <div className="service-card corporate-animation text-center">
-              <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300">
-                <img src="https://photocrewpictures.com/pics/services/caricon.png" alt="Car/Bike Shoot" className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-              </div>
-              <p className="text-white font-semibold">Car/Bike Shoot</p>
-            </div>
+              return (
+                <div key={idx} className={`service-card ${animationClass} text-center cursor-pointer`} onClick={() => {
+                  const serviceMap: Record<string, string> = {
+                    'Weddings': 'Wedding',
+                    'Hamarlok Weddings': 'Wedding',
+                    'Engagement': 'Engagement',
+                    'Pre Weddings': 'Pre-Wedding',
+                    'Maternity': 'Maternity',
+                    'Baby Shower': 'Baby Shower',
+                    'New Born': 'Baby Shower',
+                    'Baby Shoot': 'Baby Shoot',
+                    'Birthday': 'Birthday',
+                    'Naming Ceremony': 'Naming Ceremony',
+                    'House Warming': 'House Warming',
+                    'Portfolio Shoot': 'Portfolio',
+                    'Product Shoot': 'Product',
+                    'Corporate Events': 'Corporate',
+                    'Car/Bike Delivery Shoot': 'Corporate',
+                  };
+                  const serviceValue = serviceMap[service.name] || service.name;
+                  window.location.href = `/dashboard/gallery?service=${encodeURIComponent(serviceValue)}`;
+                }}>
+                  <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20">
+                    <img src={serviceIcons[service.name] || 'https://via.placeholder.com/80'} alt={service.name} className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+                  </div>
+                  <p className="text-white font-semibold">{service.name}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -691,12 +777,12 @@ export default function Home() {
             {/* Left Column - Company Info */}
             <div>
               <div className="mb-6 sm:mb-8">
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">STUDIO 24MM</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">24mm STUDIO</h3>
                 <p className="text-base sm:text-lg text-amber-600 mb-4 sm:mb-6">"Celebrating Love"</p>
               </div>
               
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8">
-                At <span className="font-semibold text-white">STUDIO 24MM</span> We Specialize In Wedding Photography And Videography, Ensuring That Every Precious Moment Of Your Special Day Is Beautifully Preserved. From The Intimate Glances To The Grand Celebrations, Our Team Is Dedicated To Capturing The Essence And Emotion Of Your Events.
+                At <span className="font-semibold text-white">24mm STUDIO</span> We Specialize In Wedding Photography And Videography, Ensuring That Every Precious Moment Of Your Special Day Is Beautifully Preserved. From The Intimate Glances To The Grand Celebrations, Our Team Is Dedicated To Capturing The Essence And Emotion Of Your Events.
               </p>
             </div>
 
@@ -721,7 +807,7 @@ export default function Home() {
                 <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 h-40 sm:h-48 flex items-center justify-center">
                   <div className="text-center text-gray-400">
                     <p className="text-xs sm:text-sm font-semibold mb-1 sm:mb-2">📍 Studio Location</p>
-                    <p className="text-xs">Studio 24MM<br />Professional Photography Studio</p>
+                    <p className="text-xs">24mm STUDIO<br />Professional Photography Studio</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
@@ -747,7 +833,7 @@ export default function Home() {
 
           {/* Bottom Copyright */}
           <div className="border-t border-gray-800 pt-6 text-center text-gray-500 text-xs sm:text-sm">
-            <p>&copy; 2026 Studio 24MM. All rights reserved.</p>
+            <p>&copy; 2026 24mm STUDIO. All rights reserved.</p>
             <p className="mt-2">Professional Wedding Photography & Videography</p>
           </div>
         </div>

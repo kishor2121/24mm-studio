@@ -15,10 +15,31 @@ export default function UploadPage() {
   const [photographer, setPhotographer] = useState<Photographer | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<'image' | 'video'>('image');
+  const [section, setSection] = useState<'home' | 'gallery'>('gallery');
+  const [service, setService] = useState('Wedding');
+  const [eventName, setEventName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const services = [
+    'Wedding',
+    'Engagement',
+    'Pre-Wedding',
+    'Maternity',
+    'Baby Shower',
+    'Baby Shoot',
+    'Birthday Shoot',
+    'Naming Ceremony',
+    'House Warming',
+    'Upanayana',
+    'Portfolio',
+    'Product Shoot',
+    'Corporate Events',
+    'Hamarlok Weddings',
+    'Car/Bike Delivery Shoot',
+  ];
 
   useEffect(() => {
     // Check if photographer is logged in
@@ -49,12 +70,6 @@ export default function UploadPage() {
               className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded transition"
             >
               Login
-            </Link>
-            <Link
-              href="/auth/register"
-              className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded transition"
-            >
-              Register
             </Link>
           </div>
         </div>
@@ -96,6 +111,9 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('type', type);
+      formData.append('section', section);
+      formData.append('service', service);
+      formData.append('eventName', eventName);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -131,12 +149,12 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4 sm:p-8">
+      <div className="max-w-2xl mx-auto px-4">
         {/* Header with Logout */}
         <div className="flex justify-between items-center mb-8">
           <Link href="/" className="text-2xl font-bold text-amber-500">
-            STUDIO 24MM
+            24mm STUDIO
           </Link>
           <div className="flex items-center gap-4">
             <div className="text-right">
@@ -190,6 +208,52 @@ export default function UploadPage() {
                 <span className="text-white">Video</span>
               </label>
             </div>
+          </div>
+
+          {/* Section/Tag Selection */}
+          <div className="mb-6">
+            <label className="block text-white font-semibold mb-4">Display Section</label>
+            <select
+              value={section}
+              onChange={(e) => setSection(e.target.value as 'home' | 'gallery')}
+              className="w-full bg-slate-700 text-white px-4 py-3 rounded mb-4 border border-slate-600 focus:border-amber-600 focus:outline-none"
+            >
+              <option value="gallery">Gallery (default)</option>
+              <option value="home">Home</option>
+            </select>
+          </div>
+
+          {/* Service Type Selection */}
+          <div className="mb-6">
+            <label className="block text-white font-semibold mb-4">Service Type</label>
+            <select
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              className="w-full bg-slate-700 text-white px-4 py-3 rounded mb-4 border border-slate-600 focus:border-amber-600 focus:outline-none"
+            >
+              {services.map((svc) => (
+                <option key={svc} value={svc}>
+                  {svc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Event/Couple Name */}
+          <div className="mb-6">
+            <label className="block text-white font-semibold mb-4">
+              Event Name (e.g., "Arjun & Jasmeet" or "Wedding Reception")
+            </label>
+            <input
+              type="text"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              placeholder="Enter couple/event name..."
+              className="w-full bg-slate-700 text-white px-4 py-3 rounded border border-slate-600 focus:border-amber-600 focus:outline-none"
+            />
+            <p className="text-gray-400 text-sm mt-2">
+              This helps organize multiple couple images from the same event
+            </p>
           </div>
 
           {/* File Input */}

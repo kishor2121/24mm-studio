@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const type = (formData.get("type") as string) || "image";
+    const section = (formData.get("section") as string) || "gallery"; // home or gallery
+    const service = (formData.get("service") as string) || "Wedding";
+    const eventName = (formData.get("eventName") as string) || "";
 
     if (!file) {
       return NextResponse.json(
@@ -68,6 +71,9 @@ export async function POST(req: NextRequest) {
         data: {
           url,
           photographerId: photographer.id,
+          section, // map the selected section/tag
+          service, // add service type
+          eventName, // add event/couple name
         },
       });
       return NextResponse.json(newImage, { status: 201 });
@@ -76,6 +82,8 @@ export async function POST(req: NextRequest) {
         data: {
           url,
           photographerId: photographer.id,
+          service, // add service type
+          eventName, // add event/couple name
         },
       });
       return NextResponse.json(newVideo, { status: 201 });

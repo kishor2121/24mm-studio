@@ -1,4 +1,4 @@
-# Studio 24MM - Professional Photography Platform
+# 24mm STUDIO - Professional Photography Platform
 
 A modern web application for photographers to upload and showcase images and videos, with a community review system.
 

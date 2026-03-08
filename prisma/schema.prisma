@@ -19,6 +19,12 @@ model Photographer {
 model Image {
   id            Int        @id @default(autoincrement())
   url           String
+  // optional tag/section to control where the image is displayed (e.g. "home" or "gallery")
+  section       String?    @default("gallery")
+  // service type (Wedding, Engagement, Pre-Wedding, etc.)
+  service       String?    @default("Wedding")
+  // event name/couple name (e.g., "Arjun & Jasmeet", "Manjunath & Ramya")
+  eventName     String?
   photographer  Photographer @relation(fields: [photographerId], references: [id])
   photographerId Int
   createdAt     DateTime   @default(now())
@@ -28,6 +34,10 @@ model Image {
 model Video {
   id            Int        @id @default(autoincrement())
   url           String
+  // service type (Wedding, Engagement, etc.)
+  service       String?    @default("Wedding")
+  // event name/couple name
+  eventName     String?
   photographer  Photographer @relation(fields: [photographerId], references: [id])
   photographerId Int
   createdAt     DateTime   @default(now())

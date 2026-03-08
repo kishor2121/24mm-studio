@@ -1,7 +1,7 @@
-# Studio 24mm - Implementation Summary
+# 24mm STUDIO - Implementation Summary
 
 ## Overview
-This document summarizes the implementation of the 24mm studio website with image and video uploads, and a review system for users.
+This document summarizes the implementation of the 24mm STUDIO website with image and video uploads, and a review system for users.
 
 ## Database Schema (Prisma)
 

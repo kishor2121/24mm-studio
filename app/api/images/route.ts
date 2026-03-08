@@ -3,7 +3,13 @@ import prisma from '@/lib/prisma';
 
 export async function GET(req: Request) {
   try {
+    const url = new URL(req.url);
+    const section = url.searchParams.get('section');
+
+    const whereClause = section ? { section } : undefined;
+
     const images = await prisma.image.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       include: {
         photographer: {

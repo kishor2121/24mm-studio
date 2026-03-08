@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 interface MediaItem {
@@ -8,6 +9,8 @@ interface MediaItem {
   url: string;
   createdAt: string;
   photographerId: number;
+  service?: string;
+  eventName?: string;
 }
 
 interface Review {
@@ -18,7 +21,17 @@ interface Review {
   createdAt: string;
 }
 
+// dummy images used when there are no uploads
+const DUMMY_GALLERY: MediaItem[] = [
+  { id: -1, url: 'https://images.unsplash.com/photo-1628519592419-bf…8MHxzZWFyY2h8M3x8c3BvcnRzJTIwY2FyfGVufDB8fDB8fHww', createdAt: '', photographerId: 0 },
+  { id: -2, url: 'https://via.placeholder.com/600x400?text=Dummy+2', createdAt: '', photographerId: 0 },
+  { id: -3, url: 'https://via.placeholder.com/600x400?text=Dummy+3', createdAt: '', photographerId: 0 },
+];
+
 export default function GalleryPage() {
+  const searchParams = useSearchParams();
+  const serviceFilter = searchParams.get('service');
+  
   const [images, setImages] = useState<MediaItem[]>([]);
   const [videos, setVideos] = useState<MediaItem[]>([]);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
@@ -27,17 +40,21 @@ export default function GalleryPage() {
   const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [tab, setTab] = useState<'image' | 'video'>('image');
+  const [mediaTab, setMediaTab] = useState<'image' | 'video'>('image');
+  const [categoryTab, setCategoryTab] = useState<'home' | 'gallery'>('gallery');
+
+  const displayImages = images.length > 0 ? images : DUMMY_GALLERY;
+  const usingDefault = images.length === 0;
 
   useEffect(() => {
     loadMedia();
-  }, []);
+  }, [categoryTab]);
 
   const loadMedia = async () => {
     try {
       setLoading(true);
       const [imagesRes, videosRes] = await Promise.all([
-        fetch('/api/images'),
+        fetch(`/api/images?section=${categoryTab}`),
         fetch('/api/videos'),
       ]);
 
@@ -56,6 +73,11 @@ export default function GalleryPage() {
       setLoading(false);
     }
   };
+
+  // Filter images by service if query param exists
+  const filteredImages = serviceFilter 
+    ? images.filter(img => img.service === serviceFilter)
+    : images;
 
   const handleMediaClick = async (item: MediaItem, type: 'image' | 'video') => {
     setSelectedMedia(item);
@@ -110,66 +132,113 @@ export default function GalleryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-8">Gallery</h1>
+    <div className="min-h-screen bg-black text-white">
+      {/* Header Section */}
+      <div className="bg-gradient-to-b from-gray-900 via-black to-black pt-16 pb-12 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-wider mb-2">
+            K A R T H I K
+            <span className="block mt-2">F R A M E S</span>
+          </h1>
+          <p className="text-amber-500 text-lg tracking-widest font-semibold">CLICKS</p>
+          <p className="text-gray-400 mt-4 text-lg">Explore our curated collection</p>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+        {mediaTab === 'image' && usingDefault && (
+          <div className="bg-amber-900 bg-opacity-30 border border-amber-600 rounded-lg p-4 mb-8 text-amber-200 text-center">
+            Showing default images. Upload some from dashboard to see them here.
+          </div>
+        )}
+        
+        {/* Category & Media Type Navigation */}
+        <div className="mb-8 space-y-6">
+          {/* Category Tabs */}
+          <div className="flex gap-8 border-b border-gray-800 pb-4">
+            <button
+              onClick={() => setCategoryTab('home')}
+              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
+                categoryTab === 'home'
+                  ? 'text-amber-400 border-amber-400'
+                  : 'text-gray-500 border-transparent hover:text-gray-300'
+              }`}
+            >
+              HOME
+            </button>
+            <button
+              onClick={() => setCategoryTab('gallery')}
+              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
+                categoryTab === 'gallery'
+                  ? 'text-amber-400 border-amber-400'
+                  : 'text-gray-500 border-transparent hover:text-gray-300'
+              }`}
+            >
+              GALLERY
+            </button>
+          </div>
+
+          {/* Media Type Tabs */}
+          <div className="flex gap-8 border-b border-gray-800 pb-4">
+            <button
+              onClick={() => setMediaTab('image')}
+              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
+                mediaTab === 'image'
+                  ? 'text-white border-white'
+                  : 'text-gray-500 border-transparent hover:text-gray-300'
+              }`}
+            >
+              IMAGES
+            </button>
+            <button
+              onClick={() => setMediaTab('video')}
+              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
+                mediaTab === 'video'
+                  ? 'text-white border-white'
+                  : 'text-gray-500 border-transparent hover:text-gray-300'
+              }`}
+            >
+              VIDEOS
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Media Grid */}
-          <div className="col-span-2">
-            {/* Tabs */}
-            <div className="flex gap-4 mb-6 border-b border-slate-700">
-              <button
-                onClick={() => setTab('image')}
-                className={`pb-2 px-4 font-semibold transition ${
-                  tab === 'image'
-                    ? 'text-blue-400 border-b-2 border-blue-400'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Images
-              </button>
-              <button
-                onClick={() => setTab('video')}
-                className={`pb-2 px-4 font-semibold transition ${
-                  tab === 'video'
-                    ? 'text-blue-400 border-b-2 border-blue-400'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Videos
-              </button>
-            </div>
-
+          <div className="lg:col-span-3">
             {/* Media Grid Display */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {loading ? (
-                <p className="text-slate-400">Loading media...</p>
-              ) : tab === 'image' && images.length === 0 ? (
-                <p className="text-slate-400">No images available</p>
-              ) : tab === 'video' && videos.length === 0 ? (
-                <p className="text-slate-400">No videos available</p>
+                <p className="text-gray-400 col-span-full text-center py-12">Loading media...</p>
+              ) : mediaTab === 'image' && filteredImages.length === 0 ? (
+                <p className="text-gray-400 col-span-full text-center py-12">{serviceFilter ? `No images for ${serviceFilter}` : 'No images available'}</p>
+              ) : mediaTab === 'video' && videos.length === 0 ? (
+                <p className="text-gray-400 col-span-full text-center py-12">No videos available</p>
               ) : (
-                (tab === 'image' ? images : videos).map((item) => (
+                (mediaTab === 'image' ? filteredImages : videos).map((item, idx) => (
                   <div
                     key={item.id}
-                    onClick={() => handleMediaClick(item, tab)}
-                    className={`cursor-pointer rounded-lg overflow-hidden transition transform hover:scale-105 ${
-                      selectedMedia?.id === item.id ? 'ring-2 ring-blue-400' : ''
-                    }`}
+                    onClick={() => handleMediaClick(item, mediaTab)}
+                    className={`group relative overflow-hidden aspect-square rounded-none transition-all duration-500 cursor-pointer ${
+                      selectedMedia?.id === item.id 
+                        ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black' 
+                        : 'ring-1 ring-gray-800 hover:ring-amber-400'
+                    } ${idx % 3 === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
                   >
-                    {tab === 'image' ? (
+                    {mediaTab === 'image' ? (
                       <img
                         src={item.url}
                         alt="Gallery item"
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     ) : (
                       <video
                         src={item.url}
-                        className="w-full h-48 object-cover bg-black"
+                        className="w-full h-full object-cover bg-black group-hover:scale-110 transition-transform duration-500"
                       />
                     )}
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </div>
                 ))
               )}
@@ -177,41 +246,41 @@ export default function GalleryPage() {
           </div>
 
           {/* Reviews Section */}
-          <div className="col-span-1">
+          <div className="lg:col-span-1">
             {selectedMedia ? (
-              <div className="bg-slate-800 rounded-lg p-6 sticky top-8">
-                <h2 className="text-xl font-bold text-white mb-4">Reviews</h2>
+              <div className="bg-gray-900 border border-gray-800 rounded-none p-6 sticky top-8">
+                <h2 className="text-xl font-bold text-white mb-6 tracking-wide">REVIEWS</h2>
 
                 {/* Review Form */}
-                <form onSubmit={handleSubmitReview} className="mb-6">
+                <form onSubmit={handleSubmitReview} className="mb-6 space-y-4">
                   <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Leave a review..."
-                    className="w-full bg-slate-700 text-white rounded p-3 mb-3 resize-none"
-                    rows={3}
+                    placeholder="Share your thoughts..."
+                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-none p-3 resize-none focus:outline-none focus:border-amber-400 placeholder-gray-500 text-sm"
+                    rows={4}
                   />
                   <button
                     type="submit"
                     disabled={submittingReview || !reviewText.trim()}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-semibold py-2 rounded transition"
+                    className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded-none transition duration-300 text-sm uppercase tracking-wide"
                   >
-                    {submittingReview ? 'Submitting...' : 'Submit Review'}
+                    {submittingReview ? 'Submitting...' : 'Submit'}
                   </button>
                 </form>
 
                 {/* Reviews List */}
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {reviews.length === 0 ? (
-                    <p className="text-slate-400 text-sm">No reviews yet</p>
+                    <p className="text-gray-500 text-sm italic">No reviews yet</p>
                   ) : (
                     reviews.map((review) => (
                       <div
                         key={review.id}
-                        className="bg-slate-700 p-3 rounded text-sm"
+                        className="bg-gray-800 border border-gray-700 p-4 text-sm space-y-2"
                       >
-                        <p className="text-white">{review.content}</p>
-                        <p className="text-slate-400 text-xs mt-2">
+                        <p className="text-white leading-relaxed">{review.content}</p>
+                        <p className="text-gray-400 text-xs">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -220,8 +289,8 @@ export default function GalleryPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-800 rounded-lg p-6 sticky top-8 text-center">
-                <p className="text-slate-400">Select a media item to see reviews</p>
+              <div className="bg-gray-900 border border-gray-800 rounded-none p-6 sticky top-8 text-center">
+                <p className="text-gray-400 text-sm">Select an image to view reviews</p>
               </div>
             )}
           </div>

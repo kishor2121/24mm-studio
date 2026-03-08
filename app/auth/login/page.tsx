@@ -43,11 +43,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-amber-500">
-            STUDIO 24MM
+            24mm STUDIO
           </Link>
           <p className="text-gray-400 mt-2">Photographer Login</p>
         </div>
@@ -104,20 +104,9 @@ export default function LoginPage() {
 
           {/* Demo Credentials */}
           <div className="mt-6 p-4 bg-blue-500 bg-opacity-10 border border-blue-500 border-opacity-30 rounded text-sm text-blue-300">
-            <p className="font-semibold mb-2">Demo Credentials:</p>
-            <p>Email: karthi04@gmail.com</p>
-            <p>Password: Karthik123</p>
+
           </div>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              New photographer?{' '}
-              <Link href="/auth/register" className="text-amber-500 hover:text-amber-400">
-                Register here
-              </Link>
-            </p>
-          </div>
         </div>
 
         {/* Back Link */}

@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Studio 24MM - Professional Photography & Videography",
+  title: "24mm STUDIO - Professional Photography & Videography",
   description: "Professional photography and videography services for weddings and special events",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

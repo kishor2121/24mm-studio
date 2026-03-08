@@ -58,7 +58,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-amber-500">
-            STUDIO 24MM
+            24mm STUDIO
           </Link>
           <p className="text-gray-400 mt-2">Create Photographer Account</p>
         </div>
