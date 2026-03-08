@@ -545,7 +545,7 @@ export default function Home() {
         <img
           src={backgroundImages[currentBgIndex]}
           alt="Background"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-2000"
+          className="absolute inset-0 w-full h-full object-contain transition-opacity duration-2000"
           style={{ opacity: bgOpacity, animation: 'zoom 10s ease-in-out infinite' }}
           onError={() => {
             console.log('Background image failed to load:', backgroundImages[currentBgIndex]);
@@ -593,7 +593,7 @@ export default function Home() {
             Explore our latest photography and videography work
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+          <div className="grid grid-cols-3 gap-0">
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
