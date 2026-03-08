@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 // Add smooth scrolling styles
@@ -231,16 +232,23 @@ const DUMMY_GALLERY = [
 ];
 
 // Home show images
-const HOMESHOW_IMAGES = [
-  { url: '/homeshowimages/ammu.jpeg' },
-  { url: '/homeshowimages/ammu1.jpeg' },
-  { url: '/homeshowimages/mokshi.jpeg' },
-  { url: '/homeshowimages/mokshi1.jpeg' },
-  { url: '/homeshowimages/aray.jpeg' },
-  { url: '/homeshowimages/aray1.jpeg' },
-  { url: '/homeshowimages/tanuja.jpeg' },
-  { url: '/homeshowimages/tanuja1.jpeg' },
-  { url: '/homeshowimages/g.jpeg' },
+const HOMESHOW_IMAGES: string[] = [
+  '/homeshowimages/bujji.jpg',
+  '/homeshowimages/bujjikoti.jpg',
+  '/homeshowimages/king.jpg',
+  '/homeshowimages/g.jpeg',
+  '/homeshowimages/tanuja.jpeg',
+  '/homeshowimages/ammu.jpeg',
+  '/homeshowimages/mokshi.jpeg',
+  '/homeshowimages/aray.jpeg',
+  '/homeshowimages/ammu1.jpeg',
+  '/homeshowimages/mokshiTanuja.jpeg',
+  '/homeshowimages/mokshi1.jpeg',
+  '/homeshowimages/tanujafamily.jpeg',
+  '/homeshowimages/aray1.jpeg',
+  '/homeshowimages/charu.jpg',
+  '/homeshowimages/lisha2.png',
+  '/homeshowimages/tanuja1.jpeg',
 ];
 
 export default function Home() {
@@ -449,15 +457,19 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
-            {HOMESHOW_IMAGES.map((image, idx) => (
+            {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
                 className="group relative overflow-hidden cursor-pointer"
               >
-                <img
-                  src={image.url}
+                <Image
+                  src={url}
                   alt={`Gallery ${idx + 1}`}
+                  width={600}
+                  height={400}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading={idx > 2 ? 'lazy' : 'eager'}
+                  priority={idx === 0}
                 />
               </div>
             ))}

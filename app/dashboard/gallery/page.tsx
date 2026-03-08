@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -28,7 +28,7 @@ const DUMMY_GALLERY: MediaItem[] = [
   { id: -3, url: 'https://via.placeholder.com/600x400?text=Dummy+3', createdAt: '', photographerId: 0 },
 ];
 
-export default function GalleryPage() {
+function GalleryContent() {
   const searchParams = useSearchParams();
   const serviceFilter = searchParams.get('service');
   
@@ -297,5 +297,13 @@ export default function GalleryPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>}>
+      <GalleryContent />
+    </Suspense>
   );
 }
