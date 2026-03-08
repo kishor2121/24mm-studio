@@ -239,7 +239,7 @@ const DUMMY_GALLERY = [
 // Home show images
 const HOMESHOW_IMAGES: string[] = [
       '/homeshowimages/bujji.jpg',
-      '/homeshowimages/flower.jpeg',
+      '/homeshowimages/flower.jpg',
       '/homeshowimages/girish.jpg',
       '/homeshowimages/tanuja1.jpeg',
       '/homeshowimages/tanujafamily.jpeg',
@@ -526,11 +526,14 @@ export default function Home() {
                 <Image
                   src={url}
                   alt={`Gallery ${idx + 1}`}
-                  width={600}
-                  height={400}
+                  width={2000}
+                  height={1333}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading={idx > 2 ? 'lazy' : 'eager'}
                   priority={idx === 0}
+                  quality={100}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  unoptimized={true}
                 />
               </div>
             ))}
