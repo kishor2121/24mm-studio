@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 // icons for floating action buttons (WhatsApp & phone)
-import { FaWhatsapp, FaPhoneAlt } from 'react-icons/fa';
+import { FaWhatsapp, FaPhoneAlt, FaInstagram } from 'react-icons/fa';
 
 // Add smooth scrolling styles
 const scrollbarStyles = `
@@ -238,22 +238,24 @@ const DUMMY_GALLERY = [
 
 // Home show images
 const HOMESHOW_IMAGES: string[] = [
-  '/homeshowimages/bujji.jpg',
-  '/homeshowimages/bujjikoti.jpg',
-  '/homeshowimages/king.jpg',
-  '/homeshowimages/g.jpeg',
-  '/homeshowimages/tanuja.jpeg',
-  '/homeshowimages/ammu.jpeg',
-  '/homeshowimages/mokshi.jpeg',
-  '/homeshowimages/aray.jpeg',
-  '/homeshowimages/ammu1.jpeg',
-  '/homeshowimages/mokshiTanuja.jpeg',
-  '/homeshowimages/mokshi1.jpeg',
-  '/homeshowimages/tanujafamily.jpeg',
-  '/homeshowimages/aray1.jpeg',
-  '/homeshowimages/charu.jpg',
-  '/homeshowimages/lisha2.png',
-  '/homeshowimages/tanuja1.jpeg',
+      '/homeshowimages/bujji.jpg',
+      '/homeshowimages/flower.jpeg',
+      '/homeshowimages/girish.jpg',
+      '/homeshowimages/tanuja1.jpeg',
+      '/homeshowimages/tanujafamily.jpeg',
+      '/homeshowimages/mokshiTanuja.jpeg',
+      '/homeshowimages/mokshi1.jpeg',
+      '/homeshowimages/mokshikrishna.jpg',
+      '/homeshowimages/mokshi.jpeg',
+      '/homeshowimages/ammu.jpeg',
+      '/homeshowimages/ammu2.jpg',
+      '/homeshowimages/ammu1.jpeg',
+      '/homeshowimages/aray.jpeg',
+
+      '/homeshowimages/aray1.jpeg',
+      '/homeshowimages/charu.jpg',
+      '/homeshowimages/lisha2.png',
+
 ];
 
 const PHONE_NUMBER = '6363967683';
@@ -337,6 +339,7 @@ export default function Home() {
       {/* Floating Action Buttons */}
       <div className="fixed bottom-8 right-8 z-40 flex flex-col gap-4">
         {/* WhatsApp Button */}
+      <div className="relative group">
         <a
           href={`https://wa.me/91${PHONE_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
           target="_blank"
@@ -347,8 +350,12 @@ export default function Home() {
         >
           <FaWhatsapp className="w-8 h-8 text-white" />
         </a>
-
+        <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          Message us on WhatsApp
+        </span>
+      </div>
         {/* Phone Call Button */}
+      <div className="relative group">
         <a
           href={`tel:+91${PHONE_NUMBER}`}
           className="w-16 h-16 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 hover:ring-4 hover:ring-offset-2 hover:ring-blue-300 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-300"
@@ -357,6 +364,26 @@ export default function Home() {
         >
           <FaPhoneAlt className="w-8 h-8 text-white" />
         </a>
+        <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          Give us a call
+        </span>
+      </div>
+      {/* Instagram Button */}
+      <div className="relative group">
+        <a
+          href="https://www.instagram.com/karthi.frames?igsh=d3VtNDcyMmU1cmo0"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-16 h-16 bg-pink-500 hover:bg-pink-600 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 hover:ring-4 hover:ring-offset-2 hover:ring-pink-300 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-pink-300"
+          title="Visit our Instagram"
+          aria-label="Visit our Instagram"
+        >
+          <FaInstagram className="w-8 h-8 text-white" />
+        </a>
+        <span className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          Follow us on Instagram
+        </span>
+      </div>
       </div>
 
       {/* Navigation */}

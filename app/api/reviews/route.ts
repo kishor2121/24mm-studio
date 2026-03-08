@@ -81,3 +81,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ message: "Failed to retrieve reviews" }, { status: 500 });
   }
 }
+
+// DELETE all reviews (useful for admin or Postman only)
+export async function DELETE(req: Request) {
+  try {
+    await prisma.review.deleteMany({});
+    return NextResponse.json({ message: 'All reviews deleted' });
+  } catch (error) {
+    console.error('Error deleting reviews:', error);
+    return NextResponse.json({ message: 'Failed to delete reviews' }, { status: 500 });
+  }
+}
