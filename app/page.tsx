@@ -251,10 +251,14 @@ const HOMESHOW_IMAGES: string[] = [
       '/homeshowimages/ammu2.jpg',
       '/homeshowimages/ammu1.jpeg',
       '/homeshowimages/aray.jpeg',
-
       '/homeshowimages/aray1.jpeg',
+       '/homeshowimages/aray3.jpg',
       '/homeshowimages/charu.jpg',
       '/homeshowimages/lisha2.png',
+      '/homeshowimages/lisha4.png',   
+      '/homeshowimages/pa1.jpg',
+      '/homeshowimages/pa2.jpg',
+      '/homeshowimages/pa3.jpg',
 
 ];
 
@@ -269,7 +273,7 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
 
-  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/24mm.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo2.jpg','/homelogo/homelogo3.jpg','/homelogo/homelogo4.jpg'];
+  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo3.jpg','/homelogo/homelogo2.jpg', '/homelogo/homelogo4.jpg', '/homelogo/homelogo7.jpg','/homelogo/homelogo5.jpg','homelogo6.jpg', '/homelogo/24mm.png'];
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
   const [displayedText, setDisplayedText] = useState('');
@@ -352,6 +356,14 @@ export default function Home() {
   // Preload background images
   useEffect(() => {
     backgroundImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Preload home show images
+  useEffect(() => {
+    HOMESHOW_IMAGES.forEach(src => {
       const img = new Image();
       img.src = src;
     });
@@ -554,8 +566,8 @@ export default function Home() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight" style={{ whiteSpace: 'nowrap' }}>
             <span className="inline-flex items-center justify-center w-12 h-12 bg-amber-500 rounded-full mr-3 animate-bounce">
               <FaCamera className="text-black text-xl" />
-            </span> {displayedText}<span className="animate-pulse text-amber-500">|</span>
-            <span className="block text-amber-500 mt-2 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">Clicks</span>
+            </span> {displayedText}
+            <span className="block text-amber-500 mt-2 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">Not just pictures — Emotions in Focus</span>
           </h1>
         </div>
 
@@ -576,7 +588,7 @@ export default function Home() {
             Explore our latest photography and videography work
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
+          <div className="grid grid-cols-3 gap-0">
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
@@ -588,11 +600,11 @@ export default function Home() {
                   width={2000}
                   height={1333}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading={idx > 2 ? 'lazy' : 'eager'}
-                  priority={idx === 0}
+                  loading={idx > 8 ? 'lazy' : 'eager'}
+                  priority={idx < 9}
                   quality={100}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  unoptimized={true}
+                  unoptimized={false}
                 />
               </div>
             ))}
