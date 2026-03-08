@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import { useEffect, useState } from 'react';
 // icons for floating action buttons (WhatsApp & phone)
 import { FaWhatsapp, FaPhoneAlt, FaInstagram } from 'react-icons/fa';
@@ -269,6 +269,10 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
 
+  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/24mm.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo2.jpg','/homelogo/homelogo3.jpg','/homelogo/homelogo4.jpg'];
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+  const [bgOpacity, setBgOpacity] = useState(1);
+
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
   
   const serviceTypes = [
@@ -334,8 +338,32 @@ export default function Home() {
     return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgOpacity(0);
+      setTimeout(() => {
+        setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
+        setBgOpacity(1);
+      }, 1000);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+  // Preload background images
+  useEffect(() => {
+    backgroundImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      <style>{`
+        @keyframes zoom {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
       {/* Floating Action Buttons */}
       <div className="fixed bottom-8 right-8 z-40 flex flex-col gap-4">
         {/* WhatsApp Button */}
@@ -484,19 +512,32 @@ export default function Home() {
       {/* Hero Section */}
       <section 
         className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 px-4 sm:px-6"
-        style={{
-          backgroundImage: 'url(/homelogo/karthik.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
       >
+        {/* Background Image with Fade */}
+        <img
+          src={backgroundImages[currentBgIndex]}
+          alt="Background"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-2000"
+          style={{ opacity: bgOpacity, animation: 'zoom 10s ease-in-out infinite' }}
+        />
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          {backgroundImages.map((_, index) => (
+            <div
+              key={index}
+              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                index === currentBgIndex ? 'bg-amber-500' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
         
         {/* Content */}
         <div className="absolute bottom-16 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center w-full px-4 sm:px-6">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight" style={{ whiteSpace: 'nowrap' }}>
             K A R T H I K F R A M E S
-            <span className="block text-amber-500 mt-2 sm:mt-4 text-2xl sm:text-3xl md:text-4xl">Clicks</span>
+            <span className="block text-amber-500 mt-2 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">Clicks</span>
           </h1>
         </div>
 
@@ -523,7 +564,7 @@ export default function Home() {
                 key={idx}
                 className="group relative overflow-hidden cursor-pointer"
               >
-                <Image
+                <NextImage
                   src={url}
                   alt={`Gallery ${idx + 1}`}
                   width={2000}
