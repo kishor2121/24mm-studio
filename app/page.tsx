@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+// icons for floating action buttons (WhatsApp & phone)
+import { FaWhatsapp, FaPhoneAlt } from 'react-icons/fa';
 
 // Add smooth scrolling styles
 const scrollbarStyles = `
@@ -225,11 +227,14 @@ function TestimonialsSection() {
 }
 
 // Fallback gallery images used when no uploads are available
+// (currently not needed; commented out to avoid unused variable errors)
+/*
 const DUMMY_GALLERY = [
   { url: 'https://via.placeholder.com/600x400?text=Dummy+1' },
   { url: 'https://via.placeholder.com/600x400?text=Dummy+2' },
   { url: 'https://via.placeholder.com/600x400?text=Dummy+3' },
 ];
+*/
 
 // Home show images
 const HOMESHOW_IMAGES: string[] = [
@@ -250,6 +255,9 @@ const HOMESHOW_IMAGES: string[] = [
   '/homeshowimages/lisha2.png',
   '/homeshowimages/tanuja1.jpeg',
 ];
+
+const PHONE_NUMBER = '6363967683';
+const WHATSAPP_MESSAGE = 'Hi! I would like to get a quick quote for photography services.';
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -289,7 +297,8 @@ export default function Home() {
     return img.service === selectedService;
   });
   
-  const galleryImages = (filteredImages && filteredImages.length > 0) ? filteredImages : DUMMY_GALLERY;
+  // When there are no filtered images, simply use an empty list
+  const galleryImages = (filteredImages && filteredImages.length > 0) ? filteredImages : [];
   const usingDefaultGallery = !(filteredImages && filteredImages.length > 0);
 
   useEffect(() => {
@@ -325,6 +334,31 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-8 right-8 z-40 flex flex-col gap-4">
+        {/* WhatsApp Button */}
+        <a
+          href={`https://wa.me/91${PHONE_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-16 h-16 bg-[#25D366] hover:bg-green-600 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 hover:ring-4 hover:ring-offset-2 hover:ring-green-300 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-green-300"
+          title="Chat on WhatsApp"
+          aria-label="Chat on WhatsApp"
+        >
+          <FaWhatsapp className="w-8 h-8 text-white" />
+        </a>
+
+        {/* Phone Call Button */}
+        <a
+          href={`tel:+91${PHONE_NUMBER}`}
+          className="w-16 h-16 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 hover:ring-4 hover:ring-offset-2 hover:ring-blue-300 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-300"
+          title="Call us"
+          aria-label="Call us"
+        >
+          <FaPhoneAlt className="w-8 h-8 text-white" />
+        </a>
+      </div>
+
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled ? 'bg-black bg-opacity-95 backdrop-blur' : 'bg-black bg-opacity-40 backdrop-blur'
@@ -516,6 +550,7 @@ export default function Home() {
       </section>
 
       {/* Secondary gallery/dummy section requested by user */}
+      {/*
       <section className="py-12 sm:py-20 bg-gray-950 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
@@ -534,6 +569,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* Services Section - What We Do */}
       <section id="services" className="py-20 bg-gray-950 relative">
