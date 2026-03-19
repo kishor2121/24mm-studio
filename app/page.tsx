@@ -597,17 +597,20 @@ export default function Home() {
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden cursor-pointer aspect-square w-full"
+                className="group relative overflow-hidden cursor-pointer aspect-square w-full bg-gray-800"
               >
                 <NextImage
                   src={url}
                   alt={`Gallery ${idx + 1}`}
-                  width={1600}
-                  height={1000}
+                  width={600}
+                  height={600}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   priority={idx < 3}
-                  quality={80}
+                  quality={90}
                   sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
+                  loading={idx < 3 ? 'eager' : 'lazy'}
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Crect fill='%23374151' width='600' height='600'/%3E%3C/svg%3E"
                 />
               </div>
             ))}
