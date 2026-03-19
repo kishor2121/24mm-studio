@@ -22,7 +22,11 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json(images);
+    return NextResponse.json(images, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
   } catch (error) {
     console.error('Error fetching images:', error);
     return NextResponse.json({ message: "Failed to fetch images" }, { status: 500 });

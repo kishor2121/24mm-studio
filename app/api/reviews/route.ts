@@ -74,7 +74,11 @@ export async function GET(req: Request) {
       });
     }
 
-    return NextResponse.json(reviews);
+    return NextResponse.json(reviews, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
 
   } catch (error) {
     console.error('Review retrieval error:', error);

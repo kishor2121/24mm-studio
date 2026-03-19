@@ -25,7 +25,11 @@ export async function GET(req: Request) {
 
     const serviceNames = services.map(s => s.service).filter(Boolean);
 
-    return NextResponse.json(serviceNames);
+    return NextResponse.json(serviceNames, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      },
+    });
   } catch (error) {
     console.error('Error fetching services:', error);
     return NextResponse.json({ message: "Failed to fetch services" }, { status: 500 });
