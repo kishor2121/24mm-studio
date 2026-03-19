@@ -309,7 +309,7 @@ function GalleryContent() {
           ) : eventCards.length === 0 ? (
             <p className="text-gray-400 text-center py-12">No events found</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {eventCards.map((event) => (
                 <div
                   key={event.eventName}
@@ -321,10 +321,10 @@ function GalleryContent() {
                     alt={event.eventName}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-black/50 rounded-lg p-4">
-                      <h3 className="text-white font-bold text-xl tracking-wide truncate">{event.eventName}</h3>
-                      <p className="text-gray-200 text-sm mt-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-2 sm:p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-black/50 rounded-lg p-2 sm:p-4">
+                      <h3 className="text-white font-bold text-sm sm:text-xl tracking-wide truncate">{event.eventName}</h3>
+                      <p className="text-gray-200 text-xs sm:text-sm mt-1">
                         {event.count} photos • {event.service}
                       </p>
                       <p className="text-gray-300 text-xs mt-1">Click to view all</p>
