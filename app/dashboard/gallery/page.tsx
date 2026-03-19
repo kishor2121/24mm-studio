@@ -42,13 +42,53 @@ function GalleryContent() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [mediaTab, setMediaTab] = useState<'image' | 'video'>('image');
   const [categoryTab, setCategoryTab] = useState<'home' | 'gallery'>('gallery');
+  const [eventNames, setEventNames] = useState<string[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<string>('');
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [selectedServiceType, setSelectedServiceType] = useState<string>('');
+  const [photographer, setPhotographer] = useState<{ id: number; name: string } | null>(null);
 
   const displayImages = images.length > 0 ? images : DUMMY_GALLERY;
   const usingDefault = images.length === 0;
 
   useEffect(() => {
     loadMedia();
+    loadEventNames();
+    loadServiceTypes();
+
+    const stored = localStorage.getItem('photographer');
+    if (stored) {
+      try {
+        setPhotographer(JSON.parse(stored));
+      } catch {
+        // ignore
+      }
+    }
   }, [categoryTab]);
+
+  const loadServiceTypes = async () => {
+    try {
+      const response = await fetch(`/api/services?section=${categoryTab}`);
+      if (response.ok) {
+        const services = await response.json();
+        setServiceTypes(services);
+      }
+    } catch (error) {
+      console.error('Failed to load service types:', error);
+    }
+  };
+
+  const loadEventNames = async () => {
+    try {
+      const response = await fetch(`/api/events?section=${categoryTab}`);
+      if (response.ok) {
+        const events = await response.json();
+        setEventNames(events);
+      }
+    } catch (error) {
+      console.error('Failed to load event names:', error);
+    }
+  };
 
   const loadMedia = async () => {
     try {
@@ -74,10 +114,29 @@ function GalleryContent() {
     }
   };
 
-  // Filter images by service if query param exists
-  const filteredImages = serviceFilter 
-    ? images.filter(img => img.service === serviceFilter)
-    : images;
+  // Filter images by service if query param exists, and by selected filters
+  const filteredImages = images.filter(img => {
+    if (serviceFilter && img.service !== serviceFilter) return false;
+    if (selectedServiceType && img.service !== selectedServiceType) return false;
+    if (selectedEvent && img.eventName !== selectedEvent) return false;
+    return true;
+  });
+
+  // Group images by event name (for event cards)
+  const eventsGrouped = filteredImages.reduce((acc, img) => {
+    const key = img.eventName || 'Others';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(img);
+    return acc;
+  }, {} as Record<string, MediaItem[]>);
+
+  const eventCards = Object.entries(eventsGrouped).map(([eventName, imgs]) => ({
+    eventName,
+    count: imgs.length,
+    cover: imgs[0],
+    service: imgs[0]?.service || 'Unknown',
+    images: imgs,
+  }));
 
   const handleMediaClick = async (item: MediaItem, type: 'image' | 'video') => {
     setSelectedMedia(item);
@@ -94,6 +153,32 @@ function GalleryContent() {
       }
     } catch (error) {
       console.error('Failed to load reviews:', error);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: number) => {
+    if (!photographer) return;
+    if (!confirm('Are you sure you want to delete this image?')) return;
+
+    try {
+      const response = await fetch(`/api/images?id=${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-photographer': JSON.stringify(photographer),
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Delete failed');
+      }
+
+      // remove deleted image from state
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      setSelectedMedia((prev) => (prev?.id === imageId ? null : prev));
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      alert('Could not delete image. Please try again.');
     }
   };
 
@@ -134,166 +219,121 @@ function GalleryContent() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header Section */}
-      <div className="bg-gradient-to-b from-gray-900 via-black to-black pt-16 pb-12 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-wider mb-2">
-            K A R T H I K
-            <span className="block mt-2">F R A M E S</span>
+      <div className="bg-gradient-to-b from-gray-900 via-black to-black pt-16 pb-12 px-0">
+        <div className="max-w-7xl mx-auto px-6">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-widest mb-4 text-center">
+            K A R T H I K&nbsp;F R A M E S
           </h1>
-          <p className="text-amber-500 text-lg tracking-widest font-semibold">CLICKS</p>
-          <p className="text-gray-400 mt-4 text-lg">Explore our curated collection</p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <a
+              href="https://wa.me/916363967683?text=Hi!%20I%20would%20like%20to%20enquire%20about%20photography%20services."
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 text-black font-semibold rounded shadow-lg transition"
+            >
+              Contact Us
+            </a>
+            <a
+              href="tel:+916363967683"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded shadow-lg transition"
+            >
+              Enquire Now
+            </a>
+          </div>
+
+          <p className="text-gray-300 text-center text-lg max-w-3xl mx-auto">
+            From the first hello to a forever promise – our journey together continues.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-        {mediaTab === 'image' && usingDefault && (
+      <div className="w-full px-0 py-8">
+        {usingDefault && (
           <div className="bg-amber-900 bg-opacity-30 border border-amber-600 rounded-lg p-4 mb-8 text-amber-200 text-center">
             Showing default images. Upload some from dashboard to see them here.
           </div>
         )}
-        
-        {/* Category & Media Type Navigation */}
-        <div className="mb-8 space-y-6">
-          {/* Category Tabs */}
-          <div className="flex gap-8 border-b border-gray-800 pb-4">
-            <button
-              onClick={() => setCategoryTab('home')}
-              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
-                categoryTab === 'home'
-                  ? 'text-amber-400 border-amber-400'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-              }`}
-            >
-              HOME
-            </button>
-            <button
-              onClick={() => setCategoryTab('gallery')}
-              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
-                categoryTab === 'gallery'
-                  ? 'text-amber-400 border-amber-400'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-              }`}
-            >
-              GALLERY
-            </button>
-          </div>
 
-          {/* Media Type Tabs */}
-          <div className="flex gap-8 border-b border-gray-800 pb-4">
-            <button
-              onClick={() => setMediaTab('image')}
-              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
-                mediaTab === 'image'
-                  ? 'text-white border-white'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-              }`}
-            >
-              IMAGES
-            </button>
-            <button
-              onClick={() => setMediaTab('video')}
-              className={`text-lg font-semibold tracking-wide transition-all duration-300 pb-2 border-b-2 ${
-                mediaTab === 'video'
-                  ? 'text-white border-white'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-              }`}
-            >
-              VIDEOS
-            </button>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 gap-6">
+          {loading ? (
+            <p className="text-gray-400 text-center py-12">Loading media...</p>
+          ) : selectedEvent ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white">{selectedEvent}</h2>
+                <p className="text-gray-300 text-sm">{filteredImages.length} photos</p>
+                <button
+                  onClick={() => setSelectedEvent('')}
+                  className="mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded text-white font-semibold"
+                >
+                  Back to Events
+                </button>
+              </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Media Grid */}
-          <div className="lg:col-span-3">
-            {/* Media Grid Display */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {loading ? (
-                <p className="text-gray-400 col-span-full text-center py-12">Loading media...</p>
-              ) : mediaTab === 'image' && filteredImages.length === 0 ? (
-                <p className="text-gray-400 col-span-full text-center py-12">{serviceFilter ? `No images for ${serviceFilter}` : 'No images available'}</p>
-              ) : mediaTab === 'video' && videos.length === 0 ? (
-                <p className="text-gray-400 col-span-full text-center py-12">No videos available</p>
-              ) : (
-                (mediaTab === 'image' ? filteredImages : videos).map((item, idx) => (
+              <div className="sm:max-w-4xl sm:mx-auto grid grid-cols-1 gap-4">
+                {filteredImages.map((item, idx) => (
                   <div
                     key={item.id}
-                    onClick={() => handleMediaClick(item, mediaTab)}
                     className={`group relative overflow-hidden aspect-square rounded-none transition-all duration-500 cursor-pointer ${
-                      selectedMedia?.id === item.id 
-                        ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black' 
+                      selectedMedia?.id === item.id
+                        ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black'
                         : 'ring-1 ring-gray-800 hover:ring-amber-400'
                     } ${idx % 3 === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
                   >
-                    {mediaTab === 'image' ? (
-                      <img
-                        src={item.url}
-                        alt="Gallery item"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <video
-                        src={item.url}
-                        className="w-full h-full object-cover bg-black group-hover:scale-110 transition-transform duration-500"
-                      />
-                    )}
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+                    <img
+                      src={item.url}
+                      alt="Gallery item"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onClick={() => handleMediaClick(item, 'image')}
+                    />
 
-          {/* Reviews Section */}
-          <div className="lg:col-span-1">
-            {selectedMedia ? (
-              <div className="bg-gray-900 border border-gray-800 rounded-none p-6 sticky top-8">
-                <h2 className="text-xl font-bold text-white mb-6 tracking-wide">REVIEWS</h2>
-
-                {/* Review Form */}
-                <form onSubmit={handleSubmitReview} className="mb-6 space-y-4">
-                  <textarea
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Share your thoughts..."
-                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-none p-3 resize-none focus:outline-none focus:border-amber-400 placeholder-gray-500 text-sm"
-                    rows={4}
-                  />
-                  <button
-                    type="submit"
-                    disabled={submittingReview || !reviewText.trim()}
-                    className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 text-white font-semibold py-2 rounded-none transition duration-300 text-sm uppercase tracking-wide"
-                  >
-                    {submittingReview ? 'Submitting...' : 'Submit'}
-                  </button>
-                </form>
-
-                {/* Reviews List */}
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {reviews.length === 0 ? (
-                    <p className="text-gray-500 text-sm italic">No reviews yet</p>
-                  ) : (
-                    reviews.map((review) => (
-                      <div
-                        key={review.id}
-                        className="bg-gray-800 border border-gray-700 p-4 text-sm space-y-2"
+                    {photographer && photographer.id === item.photographerId && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteImage(item.id);
+                        }}
+                        className="absolute top-2 right-2 z-20 rounded-full bg-black/60 p-2 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                        title="Delete image"
                       >
-                        <p className="text-white leading-relaxed">{review.content}</p>
-                        <p className="text-gray-400 text-xs">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))
-                  )}
+                        🗑️
+                      </button>
+                    )}
+
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : eventCards.length === 0 ? (
+            <p className="text-gray-400 text-center py-12">No events found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {eventCards.map((event) => (
+                <div
+                  key={event.eventName}
+                  onClick={() => setSelectedEvent(event.eventName)}
+                  className="group relative overflow-hidden aspect-square rounded-none transition-all duration-500 cursor-pointer ring-1 ring-gray-800 hover:ring-amber-400"
+                >
+                  <img
+                    src={event.cover.url}
+                    alt={event.eventName}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-black/50 rounded-lg p-4">
+                      <h3 className="text-white font-bold text-xl tracking-wide truncate">{event.eventName}</h3>
+                      <p className="text-gray-200 text-sm mt-1">
+                        {event.count} photos • {event.service}
+                      </p>
+                      <p className="text-gray-300 text-xs mt-1">Click to view all</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-gray-900 border border-gray-800 rounded-none p-6 sticky top-8 text-center">
-                <p className="text-gray-400 text-sm">Select an image to view reviews</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

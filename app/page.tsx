@@ -593,23 +593,21 @@ export default function Home() {
             Explore our latest photography and videography work
           </p>
 
-          <div className="grid grid-cols-3 gap-0">
+          <div className="grid grid-cols-3 gap-0 auto-rows-max">
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden cursor-pointer"
+                className="group relative overflow-hidden cursor-pointer aspect-square w-full"
               >
                 <NextImage
                   src={url}
                   alt={`Gallery ${idx + 1}`}
-                  width={2000}
-                  height={1333}
+                  width={1600}
+                  height={1000}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading={idx > 5 ? 'lazy' : 'eager'}
                   priority={idx < 3}
-                  quality={100}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  unoptimized={false}
+                  quality={80}
+                  sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                 />
               </div>
             ))}

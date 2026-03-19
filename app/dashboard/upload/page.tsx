@@ -18,6 +18,7 @@ export default function UploadPage() {
   const [section, setSection] = useState<'home' | 'gallery'>('gallery');
   const [service, setService] = useState('Wedding');
   const [eventName, setEventName] = useState('');
+  const [eventNames, setEventNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -50,6 +51,23 @@ export default function UploadPage() {
     setCheckingAuth(false);
   }, []);
 
+  useEffect(() => {
+    // Load existing event names for the selected section (home/gallery)
+    const loadEventNames = async () => {
+      try {
+        const response = await fetch(`/api/events?section=${section}`);
+        if (response.ok) {
+          const data = await response.json();
+          setEventNames(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to load event names:', err);
+      }
+    };
+
+    loadEventNames();
+  }, [section]);
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
@@ -77,7 +95,59 @@ export default function UploadPage() {
     );
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+  const compressImageFile = async (file: File): Promise<File> => {
+    // Resize / compress image to reduce size (if possible)
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(file);
+
+        const maxDimension = 1920;
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          const ratio = Math.min(maxDimension / width, maxDimension / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const attemptCompress = async (quality: number): Promise<File> => {
+          return new Promise((res) => {
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) return res(file);
+                const newFile = new File([blob], file.name, { type: file.type });
+                res(newFile);
+              },
+              'image/jpeg',
+              quality
+            );
+          });
+        };
+
+        let compressed = await attemptCompress(0.9);
+        let quality = 0.9;
+
+        while (compressed.size > MAX_FILE_SIZE && quality > 0.4) {
+          quality -= 0.1;
+          compressed = await attemptCompress(quality);
+        }
+
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(file);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       // Validate file type based on selected media type
@@ -91,6 +161,26 @@ export default function UploadPage() {
         setFile(null);
         return;
       }
+
+      // Enforce max size for uploads (Cloudinary limits default to ~10MB)
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        if (type === 'image') {
+          const compressed = await compressImageFile(selectedFile);
+          if (compressed.size > MAX_FILE_SIZE) {
+            setError('Image is too large even after compression. Please choose a smaller file (< 10MB).');
+            setFile(null);
+            return;
+          }
+          setFile(compressed);
+          setError(null);
+          return;
+        }
+
+        setError('File size too large. Please upload a smaller file (< 10MB).');
+        setFile(null);
+        return;
+      }
+
       setFile(selectedFile);
       setError(null);
     }
@@ -245,14 +335,20 @@ export default function UploadPage() {
               Event Name (e.g., "Arjun & Jasmeet" or "Wedding Reception")
             </label>
             <input
+              list="event-names"
               type="text"
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              placeholder="Enter couple/event name..."
+              placeholder="Select or enter couple/event name..."
               className="w-full bg-slate-700 text-white px-4 py-3 rounded border border-slate-600 focus:border-amber-600 focus:outline-none"
             />
+            <datalist id="event-names">
+              {eventNames.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
             <p className="text-gray-400 text-sm mt-2">
-              This helps organize multiple couple images from the same event
+              Choose an existing event name or type a new one to create a new group.
             </p>
           </div>
 
