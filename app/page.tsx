@@ -236,30 +236,28 @@ const DUMMY_GALLERY = [
 ];
 */
 
-// Home show images
+// Home show images - Fast HTTPS Google Drive CDN links
 const HOMESHOW_IMAGES: string[] = [
-      '/homeshowimages/bujji.jpg',
-      '/homeshowimages/flower.jpg',
-      '/homeshowimages/girish.jpg',
-      '/homeshowimages/tanuja1.jpeg',
-      '/homeshowimages/tanujafamily.jpeg',
-      '/homeshowimages/mokshiTanuja.jpeg',
-      '/homeshowimages/mokshi1.jpeg',
-      '/homeshowimages/mokshikrishna.jpg',
-      '/homeshowimages/mokshi.jpeg',
-      '/homeshowimages/ammu.jpeg',
-      '/homeshowimages/ammu2.jpg',
-      '/homeshowimages/ammu1.jpeg',
-      '/homeshowimages/aray.jpeg',
-      '/homeshowimages/aray1.jpeg',
-       '/homeshowimages/aray3.jpg',
-      '/homeshowimages/charu.jpg',
-      '/homeshowimages/lisha2.png',
-      '/homeshowimages/lisha4.png',   
-      '/homeshowimages/pa1.jpg',
-      '/homeshowimages/pa2.jpg',
-      '/homeshowimages/pa3.jpg',
-
+      'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1Rv3aPdzIx0ptjw-8IrBfAH_PUcV6Snti=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1Jmm86l7v39aJZ9m5qoFN8QFJeNzR1_He=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1x1Lyy4Jws9R-8Vn97LtSAnqDi68bJ0lS=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1Cvs4BN2_noXfZKUzJGct_NbXfYhm7b8N=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1Mig32inBRvaW0b8irWLLbFLwaSAw5rMd=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1of5XyYcBBxXCgtwHkOWnMC_osbPRNDh_=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/12Lz4DHXX7cb1O-sKIhfvcoyXJhBfA-FB=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/15AjQDGkrNw_S7RSiwksCwHw4PuRhpdNu=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1oic_LqSXfjCBg6GVviFBP25iuNr6vRP6=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1ZPZIfyW7XkdeWFLM3Xh8WPS0BF7rvkvZ=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/15eiWuH14D2i3YC1EJGZgQMsutz1b_fjV=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1Zf3dSloPnOSZKlkqqaVhhlheueUvQ_e2=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1jMHuooWIwouCRzcARKbFWP0r2CXMVua1=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1FcMwFt7TP2Xg1oiOlVnO6XR5jQe65SLt=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1OdYgKpy2sNyecbSanUIlQJNey4WBB1Qd=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1200-h1200',
 ];
 
 const PHONE_NUMBER = '6363967683';
