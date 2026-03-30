@@ -271,10 +271,19 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
 
-  const backgroundImages = ['/homelogo/karthik.png', '/homelogo/homelogo1.jpg', '/homelogo/homelogo3.jpg','/homelogo/homelogo2.jpg', '/homelogo/homelogo4.jpg', '/homelogo/homelogo7.jpg','/homelogo/homelogo5.jpg','/homelogo/homelogo6.jpg', '/homelogo/24mm.png'];
+  const backgroundImages = [
+    'https://lh3.googleusercontent.com/d/1CoANe-ob5vyJ-9hUwKGaqwfvx6U0TY1y=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1JN6kINf9_91B1MZYYtdyiyudmyW_5U8G=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1gl0OpPuDhLI60BnT-Cg5rFtRIsAi667k=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1F52Tg4-gBvN_0bgGhfPsPZGs_yG19Ysf=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1Kbn1TC3aK3FE-qvEhY29wwdhpw-06pc3=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1mFhoT0d8iYZ8Ji8GF9f6l63vpkcQTbxK=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1kUJX2xWuM11mfeHgeR0buUI7MBTHielx=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1CXHil9yDCGfbzXR5cNFOsAZARD-ZnGnX=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1t82WH-LdBq8C0PbpL3eSDDywcM-n9qhD=w1920-h1920-rw',
+  ];
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
-  const [displayedText, setDisplayedText] = useState('');
 
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
   
@@ -367,20 +376,7 @@ export default function Home() {
     });
   }, []);
 
-  // Typing animation for title
-  useEffect(() => {
-    const fullText = 'K A R T H I K   F R A M E S';
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < fullText.length) {
-        setDisplayedText(fullText.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 150);
-    return () => clearInterval(interval);
-  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <style>{`
@@ -569,7 +565,7 @@ export default function Home() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-widest text-white leading-tight">
             <span className="inline-flex items-center justify-center w-12 h-12 bg-amber-500 rounded-full mr-3 animate-bounce">
               <FaCamera className="text-black text-xl" />
-            </span> {displayedText}
+            </span> K A R T H I K   F R A M E S
             <span className="block text-amber-500 mt-2 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">Not just pictures — Emotions in Focus</span>
           </h1>
         </div>
