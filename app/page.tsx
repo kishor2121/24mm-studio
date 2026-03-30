@@ -236,28 +236,28 @@ const DUMMY_GALLERY = [
 ];
 */
 
-// Home show images - Fast HTTPS Google Drive CDN links
+// Home show images - High quality HTTPS Google Drive CDN links
 const HOMESHOW_IMAGES: string[] = [
-      'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1Rv3aPdzIx0ptjw-8IrBfAH_PUcV6Snti=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1Jmm86l7v39aJZ9m5qoFN8QFJeNzR1_He=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1x1Lyy4Jws9R-8Vn97LtSAnqDi68bJ0lS=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1Cvs4BN2_noXfZKUzJGct_NbXfYhm7b8N=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1Mig32inBRvaW0b8irWLLbFLwaSAw5rMd=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1of5XyYcBBxXCgtwHkOWnMC_osbPRNDh_=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/12Lz4DHXX7cb1O-sKIhfvcoyXJhBfA-FB=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/15AjQDGkrNw_S7RSiwksCwHw4PuRhpdNu=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1oic_LqSXfjCBg6GVviFBP25iuNr6vRP6=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1ZPZIfyW7XkdeWFLM3Xh8WPS0BF7rvkvZ=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/15eiWuH14D2i3YC1EJGZgQMsutz1b_fjV=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1Zf3dSloPnOSZKlkqqaVhhlheueUvQ_e2=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1jMHuooWIwouCRzcARKbFWP0r2CXMVua1=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1FcMwFt7TP2Xg1oiOlVnO6XR5jQe65SLt=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1OdYgKpy2sNyecbSanUIlQJNey4WBB1Qd=w1200-h1200',
-      'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1200-h1200',
+      'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1Rv3aPdzIx0ptjw-8IrBfAH_PUcV6Snti=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1Jmm86l7v39aJZ9m5qoFN8QFJeNzR1_He=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1x1Lyy4Jws9R-8Vn97LtSAnqDi68bJ0lS=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1Cvs4BN2_noXfZKUzJGct_NbXfYhm7b8N=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1Mig32inBRvaW0b8irWLLbFLwaSAw5rMd=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1of5XyYcBBxXCgtwHkOWnMC_osbPRNDh_=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/12Lz4DHXX7cb1O-sKIhfvcoyXJhBfA-FB=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/15AjQDGkrNw_S7RSiwksCwHw4PuRhpdNu=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1oic_LqSXfjCBg6GVviFBP25iuNr6vRP6=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1ZPZIfyW7XkdeWFLM3Xh8WPS0BF7rvkvZ=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/15eiWuH14D2i3YC1EJGZgQMsutz1b_fjV=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1Zf3dSloPnOSZKlkqqaVhhlheueUvQ_e2=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1jMHuooWIwouCRzcARKbFWP0r2CXMVua1=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1FcMwFt7TP2Xg1oiOlVnO6XR5jQe65SLt=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1OdYgKpy2sNyecbSanUIlQJNey4WBB1Qd=w1920-h1920-rw',
+      'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1920-h1920-rw',
 ];
 
 const PHONE_NUMBER = '6363967683';
@@ -604,7 +604,7 @@ export default function Home() {
                   height={600}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   priority={idx < 3}
-                  quality={90}
+                  unoptimized={true}
                   sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                   loading={idx < 3 ? 'eager' : 'lazy'}
                   placeholder="blur"
