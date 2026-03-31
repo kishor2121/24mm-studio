@@ -218,8 +218,114 @@ function TestimonialsSection() {
             True Emotions. True Moments. True Love Stories.
           </h3>
           <p className="text-gray-400 max-w-3xl mx-auto">
-            Your Wedding Day Is A Celebration Of Love, Laughter, And Once-In-A-Lifetime Moments. We Specialize In Capturing Those Raw, Real Emotions Through Candid Photography And Cinematic Videography—So You Can Relive The Magic, Again And Again.
+            Life is made of moments that deserve to be remembered. We capture genuine emotions, real connections, and beautiful memories — just the way they happen.
           </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Stats Counter Component with Animation
+function StatsSection() {
+  const [counts, setCounts] = useState({ weddings: 0, events: 0, videos: 0, customers: 0 });
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+          
+          // Animate numbers
+          const interval = setInterval(() => {
+            setCounts(prev => ({
+              weddings: prev.weddings < 20 ? prev.weddings + 1 : 20,
+              events: prev.events < 80 ? prev.events + 1 : 80,
+              videos: prev.videos < 60 ? prev.videos + 1 : 60,
+              customers: prev.customers < 300 ? prev.customers + 1 : 300,
+            }));
+          }, 20);
+
+          // Stop animation after completion
+          setTimeout(() => clearInterval(interval), 1600);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const element = document.getElementById('stats-section');
+    if (element) observer.observe(element);
+
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [hasStarted]);
+
+  return (
+    <section id="stats-section" className="relative py-24 bg-black overflow-hidden">
+      {/* Background Camera Image */}
+      <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&h=600&fit=crop" 
+          alt="Camera Background" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-center">
+          {/* Stat 1 - Pre Weddings Covered */}
+          <div className="group">
+            <div className="mb-4 flex justify-center">
+              <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                📷
+              </div>
+            </div>
+            <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+              {counts.weddings}<span className="text-amber-500">+</span>
+            </h3>
+            <p className="text-gray-400 uppercase tracking-widest font-semibold">Pre Wedding Covered</p>
+          </div>
+
+          {/* Stat 2 - Events Covered */}
+          <div className="group">
+            <div className="mb-4 flex justify-center">
+              <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                🎥
+              </div>
+            </div>
+            <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+              {counts.events}<span className="text-amber-500">+</span>
+            </h3>
+            <p className="text-gray-400 uppercase tracking-widest font-semibold">Events Covered</p>
+          </div>
+
+          {/* Stat 3 - Videos Edited */}
+          <div className="group">
+            <div className="mb-4 flex justify-center">
+              <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                📺
+              </div>
+            </div>
+            <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+              {counts.videos}<span className="text-amber-500">+</span>
+            </h3>
+            <p className="text-gray-400 uppercase tracking-widest font-semibold">Videos Edited</p>
+          </div>
+
+          {/* Stat 4 - Happy Customers */}
+          <div className="group">
+            <div className="mb-4 flex justify-center">
+              <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
+                👥
+              </div>
+            </div>
+            <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
+              {counts.customers}<span className="text-amber-500">+</span>
+            </h3>
+            <p className="text-gray-400 uppercase tracking-widest font-semibold">Happy Customers</p>
+          </div>
         </div>
       </div>
     </section>
@@ -288,21 +394,22 @@ export default function Home() {
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
   
   const serviceTypes = [
-    { name: 'Weddings', category: 'wedding' },
-    { name: 'Hamarlok Weddings', category: 'wedding' },
-    { name: 'Engagement', category: 'wedding' },
+    // { name: 'Weddings', category: 'wedding' },
+    // { name: 'Hamarlok Weddings', category: 'wedding' },
+    // { name: 'Engagement', category: 'wedding' },
     { name: 'Pre Weddings', category: 'wedding' },
     { name: 'Maternity', category: 'baby' },
-    { name: 'Baby Shower', category: 'baby' },
-    { name: 'New Born', category: 'baby' },
+    // { name: 'Baby Shower', category: 'baby' },
+    // { name: 'New Born', category: 'baby' },
     { name: 'Baby Shoot', category: 'baby' },
     { name: 'Birthday', category: 'celebration' },
     { name: 'Naming Ceremony', category: 'celebration' },
+    { name: 'Upanayana', category: 'celebration' },
     { name: 'House Warming', category: 'celebration' },
     { name: 'Portfolio Shoot', category: 'corporate' },
-    { name: 'Product Shoot', category: 'corporate' },
-    { name: 'Corporate Events', category: 'corporate' },
-    { name: 'Car/Bike Delivery Shoot', category: 'corporate' },
+    // { name: 'Product Shoot', category: 'corporate' },
+    // { name: 'Corporate Events', category: 'corporate' },
+    // { name: 'Car/Bike Delivery Shoot', category: 'corporate' },
   ];
 
   const filteredServices = selectedServiceType === 'all' 
@@ -803,6 +910,7 @@ export default function Home() {
                 'Baby Shoot': 'https://photocrewpictures.com/pics/services/baby_shoot.png',
                 'Birthday': 'https://photocrewpictures.com/pics/services/birthday.png',
                 'Naming Ceremony': 'https://photocrewpictures.com/pics/services/naming_cermony.png',
+                'Upanayana': 'https://photocrewpictures.com/pics/services/upanayana.png',
                 'House Warming': 'https://photocrewpictures.com/pics/services/house_warming.webp',
                 'Portfolio Shoot': 'https://photocrewpictures.com/pics/services/portfolio.png',
                 'Product Shoot': 'https://photocrewpictures.com/pics/services/product_shoot.png',
@@ -848,73 +956,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="relative py-24 bg-black overflow-hidden">
-        {/* Background Camera Image */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&h=600&fit=crop" 
-            alt="Camera Background" 
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 text-center">
-            {/* Stat 1 - Weddings Covered */}
-            <div className="group">
-              <div className="mb-4 flex justify-center">
-                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
-                  📷
-                </div>
-              </div>
-              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
-                50<span className="text-amber-500">+</span>
-              </h3>
-              <p className="text-gray-400 uppercase tracking-widest font-semibold">Weddings Covered</p>
-            </div>
-
-            {/* Stat 2 - Events Covered */}
-            <div className="group">
-              <div className="mb-4 flex justify-center">
-                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
-                  🎥
-                </div>
-              </div>
-              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
-                30<span className="text-amber-500">+</span>
-              </h3>
-              <p className="text-gray-400 uppercase tracking-widest font-semibold">Events Covered</p>
-            </div>
-
-            {/* Stat 3 - Videos Edited */}
-            <div className="group">
-              <div className="mb-4 flex justify-center">
-                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
-                  📺
-                </div>
-              </div>
-              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
-                100<span className="text-amber-500">+</span>
-              </h3>
-              <p className="text-gray-400 uppercase tracking-widest font-semibold">Videos Edited</p>
-            </div>
-
-            {/* Stat 4 - Happy Customers */}
-            <div className="group">
-              <div className="mb-4 flex justify-center">
-                <div className="text-6xl text-amber-500 group-hover:scale-110 transition duration-300">
-                  👥
-                </div>
-              </div>
-              <h3 className="text-5xl font-bold text-white mb-2 group-hover:text-amber-500 transition">
-                500<span className="text-amber-500">+</span>
-              </h3>
-              <p className="text-gray-400 uppercase tracking-widest font-semibold">Happy Customers</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Stats Section with Counter Animation */}
+      <StatsSection />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -931,19 +974,19 @@ export default function Home() {
               </div>
               
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8">
-                At <span className="font-semibold text-white">24mm STUDIO</span> We Specialize In Wedding Photography And Videography, Ensuring That Every Precious Moment Of Your Special Day Is Beautifully Preserved. From The Intimate Glances To The Grand Celebrations, Our Team Is Dedicated To Capturing The Essence And Emotion Of Your Events.
+                At <span className="font-semibold text-white">24mm Studio</span>, we specialize in capturing real emotions and timeless moments through professional photography and videography. From weddings and pre-wedding shoots to maternity, baby, and special events, we focus on natural, candid storytelling. Our goal is to turn your precious memories into beautiful visuals that you can cherish forever. With a creative approach and attention to detail, we ensure every frame reflects your story perfectly.
               </p>
             </div>
 
             {/* Middle Column - Links */}
             <div className="flex flex-col items-start sm:items-center justify-start pt-6 sm:pt-8">
               <nav className="flex flex-col gap-3 sm:gap-4 text-gray-300 text-xs sm:text-sm">
-                <a href="#" className="hover:text-amber-500 transition uppercase tracking-wide">
+                <Link href="/terms-and-conditions" className="hover:text-amber-500 transition uppercase tracking-wide">
                   Terms & Conditions
-                </a>
-                <a href="#" className="hover:text-amber-500 transition uppercase tracking-wide">
+                </Link>
+                <Link href="/privacy-policy" className="hover:text-amber-500 transition uppercase tracking-wide">
                   Privacy Policy
-                </a>
+                </Link>
                 <a href="#" className="hover:text-amber-500 transition uppercase tracking-wide">
                   Contact Us
                 </a>
@@ -953,22 +996,27 @@ export default function Home() {
             {/* Right Column - Location Map & Contact */}
             <div>
               <div className="mb-4 sm:mb-6">
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 h-40 sm:h-48 flex items-center justify-center">
-                  <div className="text-center text-gray-400">
-                    <p className="text-xs sm:text-sm font-semibold mb-1 sm:mb-2">📍 Studio Location</p>
-                    <p className="text-xs">24mm STUDIO<br />Professional Photography Studio</p>
-                  </div>
+                <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 h-40 sm:h-48">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none' }}
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.3294773830433!2d77.513298!3d12.850962!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae13db0c0c0001%3A0x0!2s24mm%20STUDIO!5e0!3m2!1sen!2sin!4v1234567890"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  <a href="#" className="text-amber-600 hover:text-amber-500">View larger map</a>
+                  <a href="https://maps.google.com/?q=12.850962,77.513298" target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:text-amber-500">View larger map</a>
                 </p>
               </div>
 
               {/* Contact Info */}
               <div className="space-y-2 text-xs sm:text-sm">
                 <p className="text-gray-300">
-                  <a href="mailto:24mmstudio@gamil.com" className="text-gray-300 hover:text-amber-500 transition">
-                    24mmstudio@gamil.com
+                  <a href="mailto:24mmvisuals@gmail.com" className="text-gray-300 hover:text-amber-500 transition">
+                    24mmvisuals@gmail.com
                   </a>
                 </p>
                 <p className="text-gray-300">
