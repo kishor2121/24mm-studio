@@ -25,6 +25,338 @@ const scrollbarStyles = `
   }
 `;
 
+// Notifications Component
+function NotificationsSection() {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications', {
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data || []);
+          // Show small toast with latest notification if exists
+          if (data && data.length > 0) {
+            setSelectedNotification(data[0]);
+            setShowToast(true);
+            // Auto hide after 6 seconds
+            setTimeout(() => setShowToast(false), 6000);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const defaultNotifications = [
+    {
+      id: 1,
+      icon: '🎉',
+      title: 'New Bookings Open',
+      description: 'We are now accepting bookings for Q2 2025! Book your wedding today.',
+      imageUrl: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=400&h=300&fit=crop',
+      color: 'from-amber-600 to-amber-700'
+    },
+    {
+      id: 2,
+      icon: '📸',
+      title: 'Maternity Shoots',
+      description: 'Celebrate motherhood with our exclusive maternity photography packages.',
+      imageUrl: 'https://images.unsplash.com/photo-1500996092556-94fe9f8be817?w=400&h=300&fit=crop',
+      color: 'from-pink-600 to-pink-700'
+    },
+    {
+      id: 3,
+      icon: '🎬',
+      title: 'Film Reels Available',
+      description: 'Check out our latest cinematic wedding films in our portfolio.',
+      imageUrl: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=300&fit=crop',
+      color: 'from-purple-600 to-purple-700'
+    }
+  ];
+
+  const displayNotifications = notifications.length > 0 ? notifications : defaultNotifications;
+  const colorMap = ['from-amber-600 to-amber-700', 'from-pink-600 to-pink-700', 'from-purple-600 to-purple-700', 'from-blue-600 to-blue-700'];
+
+  return (
+    <section className="py-12 sm:py-20 bg-black relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-12 uppercase tracking-wide text-white">
+          📢 Latest Updates
+        </h2>
+        
+        {loading ? (
+          <div className="text-center text-gray-400">Loading notifications...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayNotifications.slice(0, 3).map((notif, idx) => (
+              <div 
+                key={notif.id}
+                className={`group relative overflow-hidden rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br cursor-pointer ${notif.color || colorMap[idx % colorMap.length]}`}
+              >
+                {/* Background Image */}
+                <img 
+                  src={notif.imageUrl || notif.image} 
+                  alt={notif.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity duration-300"
+                />
+                
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+                
+                {/* Content */}
+                <div className="relative z-10 p-6 sm:p-8 h-full flex flex-col justify-between min-h-80">
+                  {/* Icon Badge */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-5xl sm:text-6xl bg-white bg-opacity-10 backdrop-blur-md p-3 rounded-lg hover:bg-opacity-20 transition">
+                      {notif.icon || (notifications.length > 0 ? '📢' : '🎯')}
+                    </div>
+                    <div className="flex flex-col gap-2 items-end">
+                      {notif.expiresAt && (
+                        <div className="text-xs font-bold uppercase tracking-widest text-amber-300 bg-red-600 bg-opacity-80 px-3 py-1 rounded-full animate-pulse">
+                          ⏰ Closing Soon
+                        </div>
+                      )}
+                      {notifications.length > 0 && (
+                        <div className="text-xs font-bold uppercase tracking-widest text-green-300 bg-green-600 bg-opacity-30 px-3 py-1 rounded-full">
+                          ✓ Active Offer
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">
+                    {notif.title}
+                  </h3>
+                  
+                  {/* Message / Description */}
+                  <p className="text-gray-200 text-sm sm:text-base leading-relaxed mb-4">
+                    {notif.description || notif.message}
+                  </p>
+                  
+                  {/* CTA Button */}
+                  <button className="mt-auto inline-flex items-center gap-2 bg-white text-black font-semibold px-6 py-2 rounded-lg hover:bg-amber-300 transition-all duration-300 group-hover:translate-x-1 group-hover:shadow-lg">
+                    View Offer
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Bottom Accent Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500 group-hover:h-2 transition-all duration-300" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Small Offer Toast Notification */}
+      {showToast && selectedNotification && (
+        <div className="fixed bottom-6 left-6 z-40 animate-bounce">
+          <div 
+            className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-full shadow-2xl p-4 flex items-center gap-3 hover:shadow-3xl transition border-2 border-amber-300 cursor-pointer hover:scale-110 transform duration-200"
+            onClick={() => {
+              setShowModal(true);
+              setShowToast(false);
+            }}>
+            {/* Icon */}
+            <div className="text-3xl">{selectedNotification.icon || '📢'}</div>
+            
+            {/* Text */}
+            <div className="text-white font-bold text-sm max-w-xs">
+              <p>{selectedNotification.title}</p>
+              {selectedNotification.expiresAt && (
+                <p className="text-xs text-amber-100">⏰ Closing soon!</p>
+              )}
+            </div>
+            
+            {/* Close */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowToast(false);
+              }}
+              className="text-white hover:text-amber-200 text-lg font-bold ml-2"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Full Offer Modal */}
+      {showModal && selectedNotification && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl max-w-5xl w-full overflow-hidden border border-amber-500/50 max-h-screen overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="fixed top-4 right-4 z-10 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition shadow-lg"
+            >
+              ✕
+            </button>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen lg:min-h-auto">
+              {/* Full Image Section - Left Side */}
+              <div className="relative h-96 lg:h-full overflow-hidden order-2 lg:order-1">
+                <img
+                  src={selectedNotification.imageUrl}
+                  alt={selectedNotification.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent opacity-40" />
+              </div>
+
+              {/* Content Section - Right Side */}
+              <div className="p-8 lg:p-12 flex flex-col justify-between order-1 lg:order-2 bg-gradient-to-b from-slate-800 to-slate-900">
+                
+                {/* Top Section - Icon & Title */}
+                <div>
+                  {/* Large Icon */}
+                  <div className="text-7xl lg:text-8xl mb-6 drop-shadow-lg">{selectedNotification.icon || '📢'}</div>
+
+                  {/* Title */}
+                  <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                    {selectedNotification.title}
+                  </h2>
+
+                  {/* Description */}
+                  <p className="text-gray-300 text-lg lg:text-xl leading-relaxed mb-6 max-h-32 overflow-y-auto">
+                    {selectedNotification.description}
+                  </p>
+                </div>
+
+                {/* Middle Section - Expiry Info */}
+                {selectedNotification.expiresAt && (
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 bg-opacity-30 border-l-4 border-amber-500 rounded-r-xl p-6 mb-8">
+                    <p className="text-amber-300 font-bold text-lg mb-2">
+                      ⏰ LIMITED TIME OFFER
+                    </p>
+                    <p className="text-white font-bold text-2xl mb-3">
+                      Closing Soon!
+                    </p>
+                    <p className="text-amber-100 text-sm font-semibold mb-4">
+                      Valid until: {new Date(selectedNotification.expiresAt).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    <div className="h-3 bg-black bg-opacity-40 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 w-2/3 rounded-full animate-pulse"></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Photographer Info */}
+                {selectedNotification.photographer && (
+                  <div className="flex items-center gap-3 mb-8 p-4 bg-slate-700 bg-opacity-50 rounded-lg border border-amber-400 border-opacity-30">
+                    <div className="text-2xl">📸</div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Created by</p>
+                      <p className="text-white font-bold">{selectedNotification.photographer.name}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Section - CTA Buttons */}
+                <div className="flex gap-4 pt-6 border-t border-slate-700">
+                  {!showContact ? (
+                    <>
+                      <button
+                        onClick={() => setShowModal(false)}
+                        className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-lg transition transform hover:scale-105 text-lg"
+                      >
+                        Close
+                      </button>
+                      <button
+                        onClick={() => setShowContact(true)}
+                        className="flex-1 bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 hover:from-amber-700 hover:via-orange-700 hover:to-red-700 text-white font-bold py-4 rounded-lg transition transform hover:scale-105 shadow-lg text-lg"
+                      >
+                        Book Now 📸
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setShowContact(false)}
+                        className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition text-sm"
+                      >
+                        ← Back
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Contact Info Section */}
+                {showContact && selectedNotification.photographer && (
+                  <div className="mt-6 space-y-4 pt-6 border-t border-slate-700">
+                    <h3 className="text-white font-bold text-xl mb-4">📞 Get in Touch</h3>
+                    
+                    {/* Phone */}
+                    <a 
+                      href="tel:+919876543210"
+                      className="block bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg transition transform hover:scale-105 text-center font-bold"
+                    >
+                      📱 Call Us: +91 9876-543210
+                    </a>
+
+                    {/* WhatsApp */}
+                    <a 
+                      href="https://wa.me/919876543210?text=Hi, I'm interested in your services"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg transition transform hover:scale-105 text-center font-bold"
+                    >
+                      💬 WhatsApp: Message Us
+                    </a>
+
+                    {/* Email */}
+                    <a 
+                      href="mailto:karthik@24mmstudio.com"
+                      className="block bg-red-600 hover:bg-red-700 text-white p-4 rounded-lg transition transform hover:scale-105 text-center font-bold"
+                    >
+                      📧 Email: karthik@24mmstudio.com
+                    </a>
+
+                    {/* Instagram */}
+                    <a 
+                      href="https://instagram.com/24mmstudio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block bg-pink-600 hover:bg-pink-700 text-white p-4 rounded-lg transition transform hover:scale-105 text-center font-bold"
+                    >
+                      📸 Instagram: @24mmstudio
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // Testimonials Component
 function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState([]);
@@ -964,6 +1296,9 @@ export default function Home() {
 
       {/* Stats Section with Counter Animation */}
       <StatsSection />
+
+      {/* Notifications Section */}
+      <NotificationsSection />
 
       {/* Testimonials Section */}
       <TestimonialsSection />

@@ -14,6 +14,7 @@ model Photographer {
   password  String
   images     Image[]
   videos     Video[]
+  notifications Notification[]
 }
 
 model Image {
@@ -54,4 +55,16 @@ model Review {
   createdAt     DateTime   @default(now())
   image         Image?     @relation(fields: [imageId], references: [id])
   video         Video?     @relation(fields: [videoId], references: [id])
+}
+
+model Notification {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String
+  imageUrl        String
+  icon            String?   @default("📢")
+  expiresAt       DateTime?
+  photographer    Photographer @relation(fields: [photographerId], references: [id])
+  photographerId  Int
+  createdAt       DateTime  @default(now())
 }

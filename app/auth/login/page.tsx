@@ -32,8 +32,8 @@ export default function LoginPage() {
       // Store photographer data in localStorage
       localStorage.setItem('photographer', JSON.stringify(data.photographer));
       
-      // Redirect to upload page
-      router.push('/dashboard/upload');
+      // Redirect to dashboard
+      router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

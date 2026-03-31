@@ -259,9 +259,9 @@ export default function UploadPage() {
         setType('image');
         setUploadProgress({ current: 0, total: 0 });
         
-        // Redirect to gallery after successful upload
+        // Redirect to main dashboard after successful upload
         setTimeout(() => {
-          router.push('/dashboard/gallery');
+          router.push('/dashboard');
         }, 1500);
       }
     } finally {
