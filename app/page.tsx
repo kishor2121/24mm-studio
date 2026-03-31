@@ -245,10 +245,10 @@ function StatsSection() {
               videos: prev.videos < 60 ? prev.videos + 1 : 60,
               customers: prev.customers < 300 ? prev.customers + 1 : 300,
             }));
-          }, 20);
+          }, 5);
 
           // Stop animation after completion
-          setTimeout(() => clearInterval(interval), 1600);
+          setTimeout(() => clearInterval(interval), 1620);
         }
       },
       { threshold: 0.5 }
