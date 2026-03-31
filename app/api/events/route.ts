@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(eventNames, {
       headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // Don't cache - always fetch fresh
       },
     });
   } catch (error) {

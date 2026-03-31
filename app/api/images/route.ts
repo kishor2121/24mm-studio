@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from '@/lib/prisma';
 import { deleteImageFromCloudinary } from '@/lib/cloudinary';
 
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(images, {
       headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // Don't cache - always fetch fresh
       },
     });
   } catch (error) {
@@ -71,6 +72,9 @@ export async function DELETE(req: Request) {
 
     // Delete from database
     await prisma.image.delete({ where: { id: image.id } });
+
+    // Revalidate cache so gallery updates immediately
+    revalidatePath("/dashboard/gallery");
 
     return NextResponse.json({ message: 'Image deleted' });
   } catch (error) {

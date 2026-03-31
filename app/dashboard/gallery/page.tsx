@@ -271,15 +271,15 @@ function GalleryContent() {
                 </button>
               </div>
 
-              <div className="sm:max-w-4xl sm:mx-auto grid grid-cols-1 gap-4">
+              <div className="sm:max-w-2xl sm:mx-auto grid grid-cols-1 gap-4">
                 {filteredImages.map((item, idx) => (
                   <div
                     key={item.id}
-                    className={`group relative overflow-hidden aspect-square rounded-none transition-all duration-500 cursor-pointer ${
+                    className={`group relative overflow-hidden aspect-video rounded-none transition-all duration-500 cursor-pointer ${
                       selectedMedia?.id === item.id
                         ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black'
                         : 'ring-1 ring-gray-800 hover:ring-amber-400'
-                    } ${idx % 3 === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
+                    }`}
                   >
                     <img
                       src={item.url}

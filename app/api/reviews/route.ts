@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
@@ -41,6 +42,10 @@ export async function POST(req: Request) {
       },
     });
 
+    // Revalidate both gallery and home page so new reviews appear immediately
+    revalidatePath("/dashboard/gallery");
+    revalidatePath("/"); // Home page testimonials
+
     return NextResponse.json(review, { status: 201 });
 
   } catch (error) {
@@ -76,7 +81,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(reviews, {
       headers: {
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // Don't cache - always fetch fresh
       },
     });
 
@@ -90,6 +95,10 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   try {
     await prisma.review.deleteMany({});
+    
+    // Revalidate gallery so reviews update immediately
+    revalidatePath("/dashboard/gallery");
+    
     return NextResponse.json({ message: 'All reviews deleted' });
   } catch (error) {
     console.error('Error deleting reviews:', error);

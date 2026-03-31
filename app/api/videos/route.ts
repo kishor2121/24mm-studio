@@ -12,7 +12,11 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json(videos);
+    return NextResponse.json(videos, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // Don't cache - always fetch fresh
+      },
+    });
   } catch (error) {
     console.error('Error fetching videos:', error);
     return NextResponse.json({ message: "Failed to fetch videos" }, { status: 500 });

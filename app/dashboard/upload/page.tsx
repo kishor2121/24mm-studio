@@ -13,7 +13,7 @@ interface Photographer {
 export default function UploadPage() {
   const router = useRouter();
   const [photographer, setPhotographer] = useState<Photographer | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [type, setType] = useState<'image' | 'video'>('image');
   const [section, setSection] = useState<'home' | 'gallery'>('gallery');
   const [service, setService] = useState('Wedding');
@@ -23,6 +23,7 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const services = [
     'Wedding',
@@ -148,18 +149,27 @@ export default function UploadPage() {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) {
+      return;
+    }
+
+    const validFiles: File[] = [];
+    let hasError = false;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const selectedFile = selectedFiles[i];
+
       // Validate file type based on selected media type
       if (type === 'image' && !selectedFile.type.startsWith('image/')) {
-        setError('Please select a valid image file');
-        setFile(null);
-        return;
+        setError(`File "${selectedFile.name}" is not a valid image file`);
+        hasError = true;
+        continue;
       }
       if (type === 'video' && !selectedFile.type.startsWith('video/')) {
-        setError('Please select a valid video file');
-        setFile(null);
-        return;
+        setError(`File "${selectedFile.name}" is not a valid video file`);
+        hasError = true;
+        continue;
       }
 
       // Enforce max size for uploads (Cloudinary limits default to ~10MB)
@@ -167,69 +177,96 @@ export default function UploadPage() {
         if (type === 'image') {
           const compressed = await compressImageFile(selectedFile);
           if (compressed.size > MAX_FILE_SIZE) {
-            setError('Image is too large even after compression. Please choose a smaller file (< 10MB).');
-            setFile(null);
-            return;
+            setError(`Image "${selectedFile.name}" is too large even after compression. Please choose a smaller file (< 10MB).`);
+            hasError = true;
+            continue;
           }
-          setFile(compressed);
-          setError(null);
-          return;
+          validFiles.push(compressed);
+        } else {
+          setError(`File "${selectedFile.name}" is too large. Please upload a smaller file (< 10MB).`);
+          hasError = true;
+          continue;
         }
-
-        setError('File size too large. Please upload a smaller file (< 10MB).');
-        setFile(null);
-        return;
+      } else {
+        validFiles.push(selectedFile);
       }
+    }
 
-      setFile(selectedFile);
-      setError(null);
+    if (validFiles.length > 0) {
+      setFiles(validFiles);
+      if (!hasError) {
+        setError(null);
+      }
+    } else if (!hasError) {
+      setError('No valid files selected');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!file) {
-      setError('Please select a file');
+    if (files.length === 0) {
+      setError('Please select at least one file');
       return;
     }
 
     setLoading(true);
     setError(null);
+    setUploadProgress({ current: 0, total: files.length });
+
+    let uploadedCount = 0;
+    let uploadError: string | null = null;
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('type', type);
-      formData.append('section', section);
-      formData.append('service', service);
-      formData.append('eventName', eventName);
+      for (let i = 0; i < files.length; i++) {
+        // Update progress before uploading
+        setUploadProgress({ current: i + 1, total: files.length });
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'x-photographer': JSON.stringify(photographer),
-        },
-        body: formData,
-      });
+        const formData = new FormData();
+        formData.append('file', files[i]);
+        formData.append('type', type);
+        formData.append('section', section);
+        formData.append('service', service);
+        formData.append('eventName', eventName);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Upload failed');
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'x-photographer': JSON.stringify(photographer),
+            },
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            uploadError = `Upload failed for "${files[i].name}": ${errorData.message || 'Unknown error'}`;
+            break;
+          }
+
+          uploadedCount++;
+        } catch (err) {
+          uploadError = `Upload failed for "${files[i].name}": ${err instanceof Error ? err.message : 'Unknown error'}`;
+          break;
+        }
       }
 
-      setSuccess(true);
-      setFile(null);
-      setType('image');
-      
-      // Redirect to gallery after successful upload
-      setTimeout(() => {
-        router.push('/dashboard/gallery');
-      }, 1500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      if (uploadError) {
+        setError(`${uploadError} (${uploadedCount} of ${files.length} files uploaded)`);
+      } else if (uploadedCount === files.length) {
+        setSuccess(true);
+        setFiles([]);
+        setType('image');
+        setUploadProgress({ current: 0, total: 0 });
+        
+        // Redirect to gallery after successful upload
+        setTimeout(() => {
+          router.push('/dashboard/gallery');
+        }, 1500);
+      }
     } finally {
       setLoading(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -275,7 +312,7 @@ export default function UploadPage() {
                   checked={type === 'image'}
                   onChange={(e) => {
                     setType('image' as 'image' | 'video');
-                    setFile(null);
+                    setFiles([]);
                     setError(null);
                   }}
                   className="w-4 h-4 mr-2"
@@ -290,7 +327,7 @@ export default function UploadPage() {
                   checked={type === 'video'}
                   onChange={(e) => {
                     setType('video' as 'image' | 'video');
-                    setFile(null);
+                    setFiles([]);
                     setError(null);
                   }}
                   className="w-4 h-4 mr-2"
@@ -355,44 +392,129 @@ export default function UploadPage() {
           {/* File Input */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-4">
-              Choose {type === 'image' ? 'Image' : 'Video'} File
+              Choose {type === 'image' ? 'Image' : 'Video'} Files (Multiple Allowed)
             </label>
-            <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-slate-500 transition">
+            <div className="border-2 border-dashed border-amber-600 rounded-lg p-8 text-center cursor-pointer hover:border-amber-400 hover:bg-amber-950 transition-all">
               <input
                 type="file"
                 onChange={handleFileChange}
                 accept={type === 'image' ? 'image/*' : 'video/*'}
+                multiple
                 className="w-full cursor-pointer"
               />
-              {file && (
-                <p className="text-green-400 mt-2">
-                  Selected: {file.name}
-                </p>
+              {files.length > 0 && (
+                <div className="mt-6 text-left">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">✓</span>
+                    </div>
+                    <p className="text-green-400 font-semibold text-lg">
+                      {files.length} file{files.length !== 1 ? 's' : ''} selected
+                    </p>
+                  </div>
+                  <ul className="text-sm text-gray-300 space-y-2 max-h-40 overflow-y-auto bg-slate-700 rounded p-3">
+                    {files.map((f, idx) => (
+                      <li key={idx} className="truncate flex items-center gap-2">
+                        <span className="text-amber-400 font-bold w-6">{idx + 1}.</span>
+                        <span className="truncate flex-1">{f.name}</span>
+                        <span className="text-gray-500 text-xs whitespace-nowrap">
+                          {(f.size / (1024 * 1024)).toFixed(1)}MB
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-300">
-              {error}
+            <div className="mb-6 p-4 bg-gradient-to-r from-red-500 to-red-600 border border-red-400 rounded-lg text-white shadow-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0 mt-1">⚠️</span>
+                <div>
+                  <p className="font-bold mb-1">Upload Error</p>
+                  <p className="text-red-50 text-sm">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {loading && uploadProgress.total > 0 && (
+            <div className="mb-6 p-6 bg-gradient-to-r from-amber-600 to-amber-700 rounded-lg shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center animate-spin">
+                    <div className="w-6 h-6 rounded-full border-2 border-amber-100 border-t-white"></div>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-lg">
+                      Uploading {uploadProgress.current} of {uploadProgress.total}
+                    </p>
+                    <p className="text-amber-100 text-sm">
+                      {Math.round((uploadProgress.current / uploadProgress.total) * 100)}% Complete
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-bold text-2xl">{uploadProgress.current}</p>
+                  <p className="text-amber-100 text-xs">of {uploadProgress.total}</p>
+                </div>
+              </div>
+              
+              <div className="w-full bg-amber-900 bg-opacity-40 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-white h-3 rounded-full transition-all duration-500 ease-out shadow-lg"
+                  style={{
+                    width: `${(uploadProgress.current / uploadProgress.total) * 100}%`,
+                    boxShadow: '0 0 10px rgba(255,255,255,0.5)',
+                  }}
+                ></div>
+              </div>
+              
+              <p className="text-amber-100 text-xs mt-3 text-center">
+                Please wait while your files are being uploaded to the cloud...
+              </p>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className="mb-6 p-4 bg-green-500 bg-opacity-20 border border-green-500 rounded text-green-300">
-              Upload successful! Redirecting to gallery...
+            <div className="mb-6 p-6 bg-gradient-to-r from-green-600 to-green-700 rounded-lg shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+                  <span className="text-green-600 text-xl font-bold">✓</span>
+                </div>
+                <div>
+                  <p className="text-white font-bold text-lg">Upload Complete!</p>
+                  <p className="text-green-100 text-sm">All files uploaded successfully. Redirecting...</p>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !file}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition"
+            disabled={loading || files.length === 0}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
           >
-            {loading ? 'Uploading...' : 'Upload'}
+            <div className="flex items-center justify-center gap-2">
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Uploading {uploadProgress.current} of {uploadProgress.total}...</span>
+                </>
+              ) : files.length > 0 ? (
+                <>
+                  <span>📤 Upload {files.length} file{files.length !== 1 ? 's' : ''}</span>
+                </>
+              ) : (
+                <span>Select files to upload</span>
+              )}
+            </div>
           </button>
         </form>
 

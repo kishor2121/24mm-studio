@@ -38,7 +38,9 @@ function TestimonialsSection() {
 
   const fetchTestimonials = async () => {
     try {
-      const res = await fetch('/api/reviews');
+      const res = await fetch('/api/reviews', {
+        cache: 'no-store' // Force fresh fetch every time
+      });
       const data = await res.json();
       setTestimonials(data || []);
     } catch (error) {
@@ -63,8 +65,12 @@ function TestimonialsSection() {
       if (res.ok) {
         setFormData({ name: '', text: '', rating: 5 });
         setShowForm(false);
-        fetchTestimonials();
         alert('Thank you for your review!');
+        
+        // Wait a moment for the database to fully commit, then fetch fresh data
+        setTimeout(() => {
+          fetchTestimonials();
+        }, 500);
       }
     } catch (error) {
       alert('Failed to submit review');
@@ -863,7 +869,7 @@ export default function Home() {
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Wedding Services
+              Pre Wedding 
             </button>
             <button
               onClick={() => setSelectedServiceType('baby')}
@@ -876,24 +882,24 @@ export default function Home() {
               Baby Services
             </button>
             <button
-              onClick={() => setSelectedServiceType('celebration')}
+              onClick={() => setSelectedServiceType('Baby Services')}
               className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
-                selectedServiceType === 'celebration'
+                selectedServiceType === 'Baby Services'
                   ? 'bg-amber-500 text-black'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Celebrations
+              Maternity
             </button>
             <button
-              onClick={() => setSelectedServiceType('corporate')}
+              onClick={() => setSelectedServiceType('Maternity')}
               className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
-                selectedServiceType === 'corporate'
+                selectedServiceType === 'Maternity'
                   ? 'bg-amber-500 text-black'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Corporate & Portfolio
+              Birthday & House Warming
             </button>
           </div>
 

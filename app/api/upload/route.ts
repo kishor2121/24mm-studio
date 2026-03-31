@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
 
@@ -76,6 +77,11 @@ export async function POST(req: NextRequest) {
           eventName, // add event/couple name
         },
       });
+      
+      // Revalidate cache so gallery shows new images immediately
+      revalidatePath("/dashboard/gallery");
+      revalidatePath("/dashboard/upload");
+      
       return NextResponse.json(newImage, { status: 201 });
     } else {
       const newVideo = await prisma.video.create({
@@ -86,6 +92,11 @@ export async function POST(req: NextRequest) {
           eventName, // add event/couple name
         },
       });
+      
+      // Revalidate cache so gallery shows new videos immediately
+      revalidatePath("/dashboard/gallery");
+      revalidatePath("/dashboard/upload");
+      
       return NextResponse.json(newVideo, { status: 201 });
     }
   } catch (error) {
