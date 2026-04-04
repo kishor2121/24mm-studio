@@ -6,11 +6,14 @@ import { uploadImageToCloudinary } from "@/lib/cloudinary";
 export async function GET(req: Request) {
   try {
     // Get active notifications (not expired)
+    const now = new Date();
+    console.log('[NOTIFICATIONS API] Current time:', now);
+    
     const notifications = await prisma.notification.findMany({
       where: {
         OR: [
           { expiresAt: null },
-          { expiresAt: { gt: new Date() } }
+          { expiresAt: { gt: now } }
         ]
       },
       include: {
@@ -19,6 +22,11 @@ export async function GET(req: Request) {
         }
       },
       orderBy: { createdAt: 'desc' }
+    });
+
+    console.log('[NOTIFICATIONS API] Found', notifications.length, 'active notifications');
+    notifications.forEach(n => {
+      console.log(`  - "${n.title}" expires at:`, n.expiresAt, 'is active:', !n.expiresAt || n.expiresAt > now);
     });
 
     return NextResponse.json(notifications, {
@@ -110,6 +118,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('[NOTIFICATIONS API - CREATE]');
+    console.log('  Title:', title);
+    console.log('  Description:', description);
+    console.log('  Raw expiresAt string:', expiresAt);
+    console.log('  Parsed expiresAt date:', expiresAt ? new Date(expiresAt) : null);
+    console.log('  Photographer ID:', photographer.id);
+    console.log('  Current time:', new Date());
+
     const notification = await prisma.notification.create({
       data: {
         title,
@@ -124,6 +140,12 @@ export async function POST(req: NextRequest) {
           select: { name: true, email: true }
         }
       }
+    });
+
+    console.log('[NOTIFICATIONS API - CREATE] Notification created:', {
+      id: notification.id,
+      expiresAt: notification.expiresAt,
+      createdAt: notification.createdAt
     });
 
     // Revalidate home page to show new notification

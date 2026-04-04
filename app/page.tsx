@@ -42,13 +42,17 @@ function NotificationsSection() {
         });
         if (res.ok) {
           const data = await res.json();
+          console.log('[HOME PAGE] Fetched notifications:', data);
           setNotifications(data || []);
           // Show small toast with latest notification if exists
           if (data && data.length > 0) {
+            console.log('[HOME PAGE] Showing toast with:', data[0].title);
             setSelectedNotification(data[0]);
             setShowToast(true);
             // Auto hide after 6 seconds
             setTimeout(() => setShowToast(false), 6000);
+          } else {
+            console.log('[HOME PAGE] No notifications found, will use defaults');
           }
         }
       } catch (error) {
@@ -704,6 +708,50 @@ const HOMESHOW_IMAGES: string[] = [
       'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1920-h1920-rw',
 ];
 
+// Preview images for each service type
+const SERVICE_PREVIEW_IMAGES: Record<string, string[]> = {
+  'Pre Weddings': [
+    'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
+  ],
+  'Maternity': [
+    'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1Rv3aPdzIx0ptjw-8IrBfAH_PUcV6Snti=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1Jmm86l7v39aJZ9m5qoFN8QFJeNzR1_He=w1920-h1920-rw',
+  ],
+  'Baby Shoot': [
+    'https://lh3.googleusercontent.com/d/1x1Lyy4Jws9R-8Vn97LtSAnqDi68bJ0lS=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1Cvs4BN2_noXfZKUzJGct_NbXfYhm7b8N=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1Mig32inBRvaW0b8irWLLbFLwaSAw5rMd=w1920-h1920-rw',
+  ],
+  'Birthday': [
+    'https://lh3.googleusercontent.com/d/1of5XyYcBBxXCgtwHkOWnMC_osbPRNDh_=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/12Lz4DHXX7cb1O-sKIhfvcoyXJhBfA-FB=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/15AjQDGkrNw_S7RSiwksCwHw4PuRhpdNu=w1920-h1920-rw',
+  ],
+  'Naming Ceremony': [
+    'https://lh3.googleusercontent.com/d/1oic_LqSXfjCBg6GVviFBP25iuNr6vRP6=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1ZPZIfyW7XkdeWFLM3Xh8WPS0BF7rvkvZ=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/15eiWuH14D2i3YC1EJGZgQMsutz1b_fjV=w1920-h1920-rw',
+  ],
+  'Upanayana': [
+    'https://lh3.googleusercontent.com/d/1Zf3dSloPnOSZKlkqqaVhhlheueUvQ_e2=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1jMHuooWIwouCRzcARKbFWP0r2CXMVua1=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1FcMwFt7TP2Xg1oiOlVnO6XR5jQe65SLt=w1920-h1920-rw',
+  ],
+  'House Warming': [
+    'https://lh3.googleusercontent.com/d/1OdYgKpy2sNyecbSanUIlQJNey4WBB1Qd=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1920-h1920-rw',
+  ],
+  'Portfolio Shoot': [
+    'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
+    'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
+  ],
+};
+
 const PHONE_NUMBER = '6363967683';
 const WHATSAPP_MESSAGE = 'Hi! I would like to get a quick quote for photography services.';
 
@@ -714,6 +762,8 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
+  const [hoveredService, setHoveredService] = useState<string | null>(null);
+  const [showServicesDropdown, setShowServicesDropdown] = useState(false);
 
   const backgroundImages = [
     'https://lh3.googleusercontent.com/d/1CoANe-ob5vyJ-9hUwKGaqwfvx6U0TY1y=w1920-h1920-rw',
@@ -732,22 +782,14 @@ export default function Home() {
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
   
   const serviceTypes = [
-    // { name: 'Weddings', category: 'wedding' },
-    // { name: 'Hamarlok Weddings', category: 'wedding' },
-    // { name: 'Engagement', category: 'wedding' },
-    { name: 'Pre Weddings', category: 'wedding' },
-    { name: 'Maternity', category: 'baby' },
-    // { name: 'Baby Shower', category: 'baby' },
-    // { name: 'New Born', category: 'baby' },
-    { name: 'Baby Shoot', category: 'baby' },
-    { name: 'Birthday', category: 'celebration' },
-    { name: 'Naming Ceremony', category: 'celebration' },
-    { name: 'Upanayana', category: 'celebration' },
-    { name: 'House Warming', category: 'celebration' },
-    { name: 'Portfolio Shoot', category: 'corporate' },
-    // { name: 'Product Shoot', category: 'corporate' },
-    // { name: 'Corporate Events', category: 'corporate' },
-    // { name: 'Car/Bike Delivery Shoot', category: 'corporate' },
+    { name: 'Pre Weddings', category: 'wedding', query: 'Pre-Wedding' },
+    { name: 'Maternity', category: 'baby', query: 'Maternity' },
+    { name: 'Baby Shoot', category: 'baby', query: 'Baby Shoot' },
+    { name: 'Birthday', category: 'celebration', query: 'Birthday Shoot' },
+    { name: 'Naming Ceremony', category: 'celebration', query: 'Naming Ceremony' },
+    { name: 'Upanayana', category: 'celebration', query: 'Upanayana' },
+    { name: 'House Warming', category: 'celebration', query: 'House Warming' },
+    { name: 'Portfolio Shoot', category: 'corporate', query: 'Portfolio' },
   ];
 
   const filteredServices = selectedServiceType === 'all' 
@@ -883,7 +925,7 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-black bg-opacity-95 backdrop-blur' : 'bg-black bg-opacity-40 backdrop-blur'
+        isScrolled ? 'bg-black/80 shadow-2xl backdrop-blur-xl' : 'bg-black/20 backdrop-blur-sm'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <Link href="/" className="text-xl sm:text-2xl font-bold tracking-widest">
@@ -920,12 +962,40 @@ export default function Home() {
             >
               Films
             </Link>
-            <Link 
-              href="#services"
-              className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide"
+            
+            {/* Services with Dropdown */}
+            <div 
+              className="relative group"
+              onMouseEnter={() => setShowServicesDropdown(true)}
+              onMouseLeave={() => setShowServicesDropdown(false)}
             >
-              Services
-            </Link>
+              <button
+                className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide flex items-center gap-1"
+              >
+                Services
+                <svg className={`w-4 h-4 transition-transform ${showServicesDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showServicesDropdown && (
+                <div className="absolute left-0 mt-0 w-56 bg-gray-900 border border-amber-500 border-opacity-30 rounded-lg shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  {serviceTypes.map((service) => (
+                    <Link
+                      key={service.name}
+                      href={`/dashboard/gallery?service=${encodeURIComponent(service.query)}`}
+                      onClick={() => {
+                        setShowServicesDropdown(false);
+                      }}
+                      className="block px-4 py-2 hover:bg-amber-500 hover:text-black transition text-sm uppercase tracking-wide"
+                    >
+                      {service.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             {!isLoggedIn && (
               <Link 
                 href="/auth/login"
@@ -958,9 +1028,37 @@ export default function Home() {
               <Link href="/dashboard/gallery" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
                 Films
               </Link>
-              <Link href="#services" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
-                Services
-              </Link>
+              
+              {/* Mobile Services Dropdown */}
+              <div className="py-2">
+                <button 
+                  onClick={() => setShowServicesDropdown(!showServicesDropdown)}
+                  className="block hover:text-amber-500 transition text-sm uppercase tracking-wide w-full text-left flex items-center justify-between"
+                >
+                  Services
+                  <svg className={`w-4 h-4 transition-transform ${showServicesDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </button>
+                {showServicesDropdown && (
+                  <div className="ml-4 mt-2 space-y-2 border-l border-amber-500 border-opacity-30 pl-4">
+                    {serviceTypes.map((service) => (
+                      <Link
+                        key={service.name}
+                        href={`/dashboard/gallery?service=${encodeURIComponent(service.query)}`}
+                        onClick={() => {
+                          setShowServicesDropdown(false);
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block hover:text-amber-500 transition text-xs uppercase tracking-wide py-1"
+                      >
+                        {service.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
               {!isLoggedIn && (
                 <Link href="/auth/login" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
                   Login
@@ -1201,7 +1299,7 @@ export default function Home() {
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Pre Wedding 
+              Wedding
             </button>
             <button
               onClick={() => setSelectedServiceType('baby')}
@@ -1211,27 +1309,27 @@ export default function Home() {
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Baby Services
+              Baby
             </button>
             <button
-              onClick={() => setSelectedServiceType('Baby Services')}
+              onClick={() => setSelectedServiceType('celebration')}
               className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
-                selectedServiceType === 'Baby Services'
+                selectedServiceType === 'celebration'
                   ? 'bg-amber-500 text-black'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Maternity
+              Celebrations
             </button>
             <button
-              onClick={() => setSelectedServiceType('Maternity')}
+              onClick={() => setSelectedServiceType('corporate')}
               className={`px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 ${
-                selectedServiceType === 'Maternity'
+                selectedServiceType === 'corporate'
                   ? 'bg-amber-500 text-black'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
-              Birthday & House Warming
+              Corporate
             </button>
           </div>
 
@@ -1262,31 +1360,42 @@ export default function Home() {
                 : 'corporate-animation';
 
               return (
-                <div key={idx} className={`service-card ${animationClass} text-center cursor-pointer`} onClick={() => {
-                  const serviceMap: Record<string, string> = {
-                    'Weddings': 'Wedding',
-                    'Hamarlok Weddings': 'Wedding',
-                    'Engagement': 'Engagement',
-                    'Pre Weddings': 'Pre-Wedding',
-                    'Maternity': 'Maternity',
-                    'Baby Shower': 'Baby Shower',
-                    'New Born': 'Baby Shower',
-                    'Baby Shoot': 'Baby Shoot',
-                    'Birthday': 'Birthday',
-                    'Naming Ceremony': 'Naming Ceremony',
-                    'House Warming': 'House Warming',
-                    'Portfolio Shoot': 'Portfolio',
-                    'Product Shoot': 'Product',
-                    'Corporate Events': 'Corporate',
-                    'Car/Bike Delivery Shoot': 'Corporate',
-                  };
-                  const serviceValue = serviceMap[service.name] || service.name;
-                  window.location.href = `/dashboard/gallery?service=${encodeURIComponent(serviceValue)}`;
-                }}>
-                  <div className="service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20">
+                <div 
+                  key={idx} 
+                  className={`service-card ${animationClass} text-center cursor-pointer group relative`}
+                  onMouseEnter={() => setHoveredService(service.name)}
+                  onMouseLeave={() => setHoveredService(null)}
+                  onClick={() => {
+                    const queryValue = service.query || service.name;
+                    window.location.href = `/dashboard/gallery?service=${encodeURIComponent(queryValue)}`;
+                  }}
+                >
+                  {/* Hover Preview */}
+                  {hoveredService === service.name && SERVICE_PREVIEW_IMAGES[service.name] && (
+                    <div className="absolute inset-0 z-40 rounded-lg overflow-hidden">
+                      <div className="grid grid-cols-3 gap-0 h-full">
+                        {SERVICE_PREVIEW_IMAGES[service.name].map((imgUrl, imgIdx) => (
+                          <div key={imgIdx} className="relative overflow-hidden">
+                            <img
+                              src={imgUrl}
+                              alt={`${service.name} preview ${imgIdx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="text-white font-semibold text-xs sm:text-sm px-2 text-center">Click to View Gallery</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Default View */}
+                  <div className={`service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>
                     <img src={serviceIcons[service.name] || 'https://via.placeholder.com/80'} alt={service.name} className="service-icon w-20 h-20 object-contain transition-all duration-300" />
                   </div>
-                  <p className="text-white font-semibold">{service.name}</p>
+                  <p className={`text-white font-semibold transition-opacity duration-300 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>{service.name}</p>
                 </div>
               );
             })}
@@ -1296,9 +1405,6 @@ export default function Home() {
 
       {/* Stats Section with Counter Animation */}
       <StatsSection />
-
-      {/* Notifications Section */}
-      <NotificationsSection />
 
       {/* Testimonials Section */}
       <TestimonialsSection />
@@ -1372,7 +1478,7 @@ export default function Home() {
           {/* Bottom Copyright */}
           <div className="border-t border-gray-800 pt-6 text-center text-gray-500 text-xs sm:text-sm">
             <p>&copy; 2026 24mm STUDIO. All rights reserved.</p>
-            <p className="mt-2">Professional Wedding Photography & Videography</p>
+            <p className="mt-2">Professional  Photography & Cinematography</p>
           </div>
         </div>
       </footer>

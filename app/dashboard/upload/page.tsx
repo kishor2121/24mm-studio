@@ -16,7 +16,7 @@ export default function UploadPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [type, setType] = useState<'image' | 'video'>('image');
   const [section, setSection] = useState<'home' | 'gallery'>('gallery');
-  const [service, setService] = useState('Wedding');
+  const [service, setService] = useState('Pre-Wedding');
   const [eventName, setEventName] = useState('');
   const [eventNames, setEventNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,21 +26,14 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const services = [
-    'Wedding',
-    'Engagement',
     'Pre-Wedding',
     'Maternity',
-    'Baby Shower',
     'Baby Shoot',
     'Birthday Shoot',
     'Naming Ceremony',
-    'House Warming',
     'Upanayana',
+    'House Warming',
     'Portfolio',
-    'Product Shoot',
-    'Corporate Events',
-    'Hamarlok Weddings',
-    'Car/Bike Delivery Shoot',
   ];
 
   useEffect(() => {

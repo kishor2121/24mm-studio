@@ -31,6 +31,7 @@ const DUMMY_GALLERY: MediaItem[] = [
 function GalleryContent() {
   const searchParams = useSearchParams();
   const serviceFilter = searchParams.get('service');
+  const normalizedServiceFilter = serviceFilter ? serviceFilter.trim().toLowerCase() : '';
   
   const [images, setImages] = useState<MediaItem[]>([]);
   const [videos, setVideos] = useState<MediaItem[]>([]);
@@ -49,7 +50,7 @@ function GalleryContent() {
   const [photographer, setPhotographer] = useState<{ id: number; name: string } | null>(null);
 
   const displayImages = images.length > 0 ? images : DUMMY_GALLERY;
-  const usingDefault = images.length === 0;
+  const usingDefault = !loading && images.length === 0;
 
   useEffect(() => {
     loadMedia();
@@ -116,7 +117,7 @@ function GalleryContent() {
 
   // Filter images by service if query param exists, and by selected filters
   const filteredImages = images.filter(img => {
-    if (serviceFilter && img.service !== serviceFilter) return false;
+    if (normalizedServiceFilter && img.service?.trim().toLowerCase() !== normalizedServiceFilter) return false;
     if (selectedServiceType && img.service !== selectedServiceType) return false;
     if (selectedEvent && img.eventName !== selectedEvent) return false;
     return true;
@@ -227,6 +228,12 @@ function GalleryContent() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <a
+              href="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 bg-white/10 hover:bg-white/20 text-white font-semibold rounded shadow-lg transition"
+            >
+              ← Back to Home
+            </a>
+            <a
               href="https://wa.me/916363967683?text=Hi!%20I%20would%20like%20to%20enquire%20about%20photography%20services."
               target="_blank"
               rel="noreferrer"
@@ -249,7 +256,14 @@ function GalleryContent() {
       </div>
 
       <div className="w-full px-0 py-8">
-        {usingDefault && (
+        {normalizedServiceFilter && (
+          <div className="max-w-7xl mx-auto px-6 mb-6">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-600/10 px-5 py-3 text-amber-100 text-center">
+              Showing gallery for <span className="font-semibold text-white">{serviceFilter}</span>
+            </div>
+          </div>
+        )}
+        {!loading && usingDefault && (
           <div className="bg-amber-900 bg-opacity-30 border border-amber-600 rounded-lg p-4 mb-8 text-amber-200 text-center">
             Showing default images. Upload some from dashboard to see them here.
           </div>
@@ -257,7 +271,18 @@ function GalleryContent() {
 
         <div className="grid grid-cols-1 gap-6">
           {loading ? (
-            <p className="text-gray-400 text-center py-12">Loading media...</p>
+            <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4 rounded-3xl border border-amber-500/20 bg-black/80 p-10 text-center shadow-2xl shadow-amber-500/10">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center text-amber-500 text-3xl">📸</div>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-white">Please wait — loading your gallery</p>
+                <p className="text-gray-400 max-w-lg mx-auto mt-2">
+                  Preparing related photography images and service collections now.
+                </p>
+              </div>
+            </div>
           ) : selectedEvent ? (
             <div className="space-y-6">
               <div className="text-center mb-6">
@@ -342,7 +367,18 @@ function GalleryContent() {
 
 export default function GalleryPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4">
+        <div className="relative mb-6">
+          <div className="w-24 h-24 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center text-amber-500 text-3xl">📸</div>
+        </div>
+        <div className="space-y-2 text-center">
+          <p className="text-2xl font-semibold">Loading gallery…</p>
+          <p className="text-gray-400 max-w-sm mx-auto">Please wait while we prepare your photography showcase.</p>
+        </div>
+      </div>
+    }>
       <GalleryContent />
     </Suspense>
   );

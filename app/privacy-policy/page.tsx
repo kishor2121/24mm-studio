@@ -151,7 +151,7 @@ export default function PrivacyPolicy() {
       <footer className="bg-black border-t border-gray-800 py-8 mt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-gray-500 text-xs sm:text-sm">
           <p>&copy; 2026 24mm STUDIO. All rights reserved.</p>
-          <p className="mt-2">Professional Wedding Photography & Videography</p>
+          <p className="mt-2">Professional  Photography & Cinematography</p>
         </div>
       </footer>
     </div>
