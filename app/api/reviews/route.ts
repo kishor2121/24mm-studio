@@ -91,13 +91,33 @@ export async function GET(req: Request) {
   }
 }
 
-// DELETE all reviews (useful for admin or Postman only)
+// DELETE a review by id or delete all reviews if no id is provided
 export async function DELETE(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const reviewId = searchParams.get('reviewId');
+
+    if (reviewId) {
+      const id = parseInt(reviewId, 10);
+      if (Number.isNaN(id)) {
+        return NextResponse.json({ message: 'Invalid reviewId' }, { status: 400 });
+      }
+
+      const deletedReview = await prisma.review.delete({
+        where: { id },
+      });
+
+      revalidatePath('/dashboard/gallery');
+      revalidatePath('/');
+
+      return NextResponse.json({ message: 'Review deleted', review: deletedReview });
+    }
+
     await prisma.review.deleteMany({});
     
     // Revalidate gallery so reviews update immediately
-    revalidatePath("/dashboard/gallery");
+    revalidatePath('/dashboard/gallery');
+    revalidatePath('/');
     
     return NextResponse.json({ message: 'All reviews deleted' });
   } catch (error) {

@@ -33,6 +33,7 @@ export default function UploadPage() {
     'Naming Ceremony',
     'Upanayana',
     'House Warming',
+    'Mehndi',
     'Portfolio',
   ];
 

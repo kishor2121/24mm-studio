@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 // icons for floating action buttons (WhatsApp & phone)
 import { FaWhatsapp, FaPhoneAlt, FaInstagram, FaCamera } from 'react-icons/fa';
 
@@ -362,10 +362,11 @@ function NotificationsSection() {
 }
 
 // Testimonials Component
-function TestimonialsSection() {
-  const [testimonials, setTestimonials] = useState([]);
+function TestimonialsSection({ isLoggedIn }: { isLoggedIn: boolean }) {
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showForm, setShowForm] = useState(false);
+  const [deletedReview, setDeletedReview] = useState<any | null>(null);
   const [formData, setFormData] = useState({ name: '', text: '', rating: 5 });
 
   useEffect(() => {
@@ -384,7 +385,7 @@ function TestimonialsSection() {
     }
   };
 
-  const handleSubmitReview = async (e) => {
+  const handleSubmitReview = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.text.trim()) {
       alert('Please fill all fields');
@@ -413,8 +414,53 @@ function TestimonialsSection() {
     }
   };
 
-  const visibleTestimonials = testimonials
-    .sort((a, b) => (b.rating || 5) - (a.rating || 5));
+  const handleDeleteReview = async (reviewId: number) => {
+    const reviewToDelete = testimonials.find((review: any) => review.id === reviewId);
+    if (!reviewToDelete) return;
+
+    if (!confirm('Are you sure you want to delete this review?')) return;
+    try {
+      const res = await fetch(`/api/reviews?reviewId=${reviewId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Delete failed');
+
+      setDeletedReview(reviewToDelete);
+      await fetchTestimonials();
+    } catch (error) {
+      console.error('Failed to delete review:', error);
+      alert('Could not delete review. Please try again.');
+    }
+  };
+
+  const handleReviveReview = async () => {
+    if (!deletedReview) return;
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: deletedReview.name,
+          text: deletedReview.content,
+          rating: deletedReview.rating,
+          imageId: deletedReview.imageId,
+          videoId: deletedReview.videoId,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Revive failed');
+
+      setDeletedReview(null);
+      fetchTestimonials();
+    } catch (error) {
+      console.error('Failed to revive review:', error);
+      alert('Could not revive review. Please try again.');
+    }
+  };
+
+  const visibleTestimonials = [...testimonials]
+    .sort((a: any, b: any) => (b.rating || 5) - (a.rating || 5));
 
   return (
     <section className="py-12 sm:py-20 bg-black relative">
@@ -433,6 +479,21 @@ function TestimonialsSection() {
           ** Reviews **
         </h2>
 
+        {isLoggedIn && deletedReview && (
+          <div className="mb-8 rounded-2xl border border-amber-500 bg-amber-500/10 p-5 text-amber-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="font-semibold">Review deleted.</p>
+              <p className="text-sm text-gray-200">Click revive to restore it immediately.</p>
+            </div>
+            <button
+              onClick={handleReviveReview}
+              className="bg-amber-500 text-black font-semibold px-5 py-2 rounded-lg hover:bg-amber-400 transition"
+            >
+              Revive Review
+            </button>
+          </div>
+        )}
+
         {/* All Reviews - Horizontal Scrolling */}
         <div className="mb-8 sm:mb-12 overflow-hidden">
           <div className="overflow-x-auto scrollbar-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
@@ -440,7 +501,7 @@ function TestimonialsSection() {
               {visibleTestimonials.length > 0 ? (
                 visibleTestimonials.map((testimonial, idx) => (
                   <div
-                    key={idx}
+                    key={testimonial.id ?? idx}
                     className="border border-gray-600 rounded-lg p-8 sm:p-10 hover:border-amber-500 transition bg-black bg-opacity-40 flex-shrink-0 w-80 sm:w-96"
                   >
                     {/* Star Rating */}
@@ -456,7 +517,17 @@ function TestimonialsSection() {
                     <p className="text-gray-300 italic mb-8 text-sm sm:text-base leading-relaxed">
                       {testimonial.content}
                     </p>
-                    <p className="text-amber-500 font-semibold text-sm sm:text-base">— {testimonial.name}</p>
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-amber-500 font-semibold text-sm sm:text-base">— {testimonial.name}</p>
+                      {isLoggedIn && (
+                        <button
+                          onClick={() => handleDeleteReview(testimonial.id)}
+                          className="text-xs uppercase tracking-widest bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full transition"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -750,6 +821,11 @@ const SERVICE_PREVIEW_IMAGES: Record<string, string[]> = {
     'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
     'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
   ],
+  // 'Mehndi': [
+  //   'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1200&h=1200&fit=crop',
+  //   'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&h=1200&fit=crop',
+  //   'https://images.unsplash.com/photo-1543968996-1a2ba4d876f1?w=1200&h=1200&fit=crop',
+  // ],
 };
 
 const PHONE_NUMBER = '6363967683';
@@ -779,7 +855,7 @@ export default function Home() {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
 
-  const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Portfolio', 'Corporate Events'];
+  const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Mehndi', 'Portfolio', 'Corporate Events'];
   
   const serviceTypes = [
     { name: 'Pre Weddings', category: 'wedding', query: 'Pre-Wedding' },
@@ -789,6 +865,7 @@ export default function Home() {
     { name: 'Naming Ceremony', category: 'celebration', query: 'Naming Ceremony' },
     { name: 'Upanayana', category: 'celebration', query: 'Upanayana' },
     { name: 'House Warming', category: 'celebration', query: 'House Warming' },
+    { name: 'Mehndi', category: 'wedding', query: 'Mehndi' },
     { name: 'Portfolio Shoot', category: 'corporate', query: 'Portfolio' },
   ];
 
@@ -1349,6 +1426,7 @@ export default function Home() {
                 'Upanayana': 'https://photocrewpictures.com/pics/services/upanayana.png',
                 'House Warming': 'https://photocrewpictures.com/pics/services/house_warming.webp',
                 'Portfolio Shoot': 'https://photocrewpictures.com/pics/services/portfolio.png',
+                // 'Mehndi': 'https://img.icons8.com/fluency/96/000000/henna.png',
                 'Product Shoot': 'https://photocrewpictures.com/pics/services/product_shoot.png',
                 'Corporate Events': 'https://photocrewpictures.com/pics/services/corporate_events.png',
                 'Car/Bike Delivery Shoot': 'https://photocrewpictures.com/pics/services/caricon.png',
@@ -1393,7 +1471,11 @@ export default function Home() {
                   
                   {/* Default View */}
                   <div className={`service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>
-                    <img src={serviceIcons[service.name] || 'https://via.placeholder.com/80'} alt={service.name} className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+                    {serviceIcons[service.name] ? (
+                      <img src={serviceIcons[service.name]} alt={service.name} className="service-icon w-20 h-20 object-contain transition-all duration-300" />
+                    ) : (
+                      <div className="w-20 h-20" />
+                    )}
                   </div>
                   <p className={`text-white font-semibold transition-opacity duration-300 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>{service.name}</p>
                 </div>
@@ -1407,7 +1489,7 @@ export default function Home() {
       <StatsSection />
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      <TestimonialsSection isLoggedIn={isLoggedIn} />
 
       {/* Footer Section */}
       <footer className="bg-black border-t border-gray-800 py-12 sm:py-16">
