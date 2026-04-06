@@ -92,9 +92,59 @@ export default function UploadPage() {
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-  const compressImageFile = async (file: File): Promise<File> => {
-    // Resize / compress image to reduce size (if possible)
+  // Function to get EXIF orientation from image file
+  const getExifOrientation = (file: File): Promise<number> => {
     return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const view = new DataView(e.target?.result as ArrayBuffer);
+        if (view.getUint16(0, false) !== 0xFFD8) {
+          resolve(1); // Not a JPEG
+          return;
+        }
+
+        const length = view.byteLength;
+        let offset = 2;
+
+        while (offset < length) {
+          if (view.getUint16(offset + 2, false) <= 8) break;
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+
+          if (marker === 0xFFE1) {
+            if (view.getUint32(offset + 2, false) !== 0x45786966) {
+              resolve(1);
+              return;
+            }
+
+            const little = view.getUint16(offset + 8, false) === 0x4949;
+            offset += view.getUint16(offset, false);
+            const tags = view.getUint16(offset, little);
+            offset += 2;
+
+            for (let i = 0; i < tags; i++) {
+              if (view.getUint16(offset + i * 12, little) === 0x0112) {
+                resolve(view.getUint16(offset + i * 12 + 8, little));
+                return;
+              }
+            }
+          } else if ((marker & 0xFF00) !== 0xFF00) {
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
+          }
+        }
+        resolve(1);
+      };
+      reader.readAsArrayBuffer(file.slice(0, 65536)); // Read first 64KB for EXIF
+    });
+  };
+
+  const compressImageFile = async (file: File): Promise<File> => {
+    // Resize / compress image to reduce size (if possible) and handle orientation
+    return new Promise(async (resolve) => {
+      const orientation = await getExifOrientation(file);
+
       const img = new Image();
       img.onload = async () => {
         const canvas = document.createElement('canvas');
@@ -103,15 +153,72 @@ export default function UploadPage() {
 
         const maxDimension = 1920;
         let { width, height } = img;
-        if (width > maxDimension || height > maxDimension) {
-          const ratio = Math.min(maxDimension / width, maxDimension / height);
+
+        // Adjust dimensions based on orientation
+        let canvasWidth = width;
+        let canvasHeight = height;
+
+        // For orientations 5-8, we need to swap width and height
+        if (orientation > 4) {
+          [canvasWidth, canvasHeight] = [canvasHeight, canvasWidth];
+        }
+
+        // Scale down if necessary
+        if (canvasWidth > maxDimension || canvasHeight > maxDimension) {
+          const ratio = Math.min(maxDimension / canvasWidth, maxDimension / canvasHeight);
+          canvasWidth = Math.round(canvasWidth * ratio);
+          canvasHeight = Math.round(canvasHeight * ratio);
           width = Math.round(width * ratio);
           height = Math.round(height * ratio);
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // Apply transformations based on EXIF orientation
+        ctx.save();
+        switch (orientation) {
+          case 2:
+            ctx.scale(-1, 1);
+            ctx.translate(-canvasWidth, 0);
+            break;
+          case 3:
+            ctx.scale(-1, -1);
+            ctx.translate(-canvasWidth, -canvasHeight);
+            break;
+          case 4:
+            ctx.scale(1, -1);
+            ctx.translate(0, -canvasHeight);
+            break;
+          case 5:
+            ctx.scale(-1, 1);
+            ctx.rotate(Math.PI / 2);
+            ctx.translate(-canvasWidth, 0);
+            break;
+          case 6:
+            ctx.rotate(Math.PI / 2);
+            ctx.translate(0, -canvasWidth);
+            break;
+          case 7:
+            ctx.scale(-1, 1);
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(-canvasHeight, -canvasWidth);
+            break;
+          case 8:
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(-canvasHeight, 0);
+            break;
+          default:
+            // Orientation 1: no transformation needed
+            break;
+        }
+
         ctx.drawImage(img, 0, 0, width, height);
+        ctx.restore();
+
+        // If file is small, keep high quality; only compress if needed
+        const needsCompression = file.size > MAX_FILE_SIZE;
+        const initialQuality = needsCompression ? 0.9 : 0.95;
 
         const attemptCompress = async (quality: number): Promise<File> => {
           return new Promise((res) => {
@@ -127,9 +234,10 @@ export default function UploadPage() {
           });
         };
 
-        let compressed = await attemptCompress(0.9);
-        let quality = 0.9;
+        let compressed = await attemptCompress(initialQuality);
+        let quality = initialQuality;
 
+        // Only reduce quality further if file is still too large
         while (compressed.size > MAX_FILE_SIZE && quality > 0.4) {
           quality -= 0.1;
           compressed = await attemptCompress(quality);
@@ -166,21 +274,19 @@ export default function UploadPage() {
         continue;
       }
 
-      // Enforce max size for uploads (Cloudinary limits default to ~10MB)
-      if (selectedFile.size > MAX_FILE_SIZE) {
-        if (type === 'image') {
-          const compressed = await compressImageFile(selectedFile);
-          if (compressed.size > MAX_FILE_SIZE) {
-            setError(`Image "${selectedFile.name}" is too large even after compression. Please choose a smaller file (< 10MB).`);
-            hasError = true;
-            continue;
-          }
-          validFiles.push(compressed);
-        } else {
-          setError(`File "${selectedFile.name}" is too large. Please upload a smaller file (< 10MB).`);
+      // For images, always compress to fix orientation and optimize size
+      if (type === 'image') {
+        const processed = await compressImageFile(selectedFile);
+        if (processed.size > MAX_FILE_SIZE) {
+          setError(`Image "${selectedFile.name}" is too large even after compression. Please choose a smaller file (< 10MB).`);
           hasError = true;
           continue;
         }
+        validFiles.push(processed);
+      } else if (selectedFile.size > MAX_FILE_SIZE) {
+        setError(`File "${selectedFile.name}" is too large. Please upload a smaller file (< 10MB).`);
+        hasError = true;
+        continue;
       } else {
         validFiles.push(selectedFile);
       }
@@ -233,8 +339,20 @@ export default function UploadPage() {
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            uploadError = `Upload failed for "${files[i].name}": ${errorData.message || 'Unknown error'}`;
+            let errorMessage = 'Unknown error';
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || 'Unknown error';
+            } catch (jsonError) {
+              // If response is not JSON, try to get text
+              try {
+                const errorText = await response.text();
+                errorMessage = errorText || `HTTP ${response.status}: ${response.statusText}`;
+              } catch (textError) {
+                errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+              }
+            }
+            uploadError = `Upload failed for "${files[i].name}": ${errorMessage}`;
             break;
           }
 

@@ -309,7 +309,7 @@ function GalleryContent() {
                     <img
                       src={item.url}
                       alt="Gallery item"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-contain bg-black transition-transform duration-500"
                       onClick={() => handleMediaClick(item, 'image')}
                     />
 
@@ -344,7 +344,7 @@ function GalleryContent() {
                   <img
                     src={event.cover.url}
                     alt={event.eventName}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-contain bg-black transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-2 sm:p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-black/50 rounded-lg p-2 sm:p-4">
