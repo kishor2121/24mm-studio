@@ -780,54 +780,6 @@ const HOMESHOW_IMAGES: string[] = [
 ];
 
 // Preview images for each service type
-const SERVICE_PREVIEW_IMAGES: Record<string, string[]> = {
-  'Pre Weddings': [
-    'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
-  ],
-  'Maternity': [
-    'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1Rv3aPdzIx0ptjw-8IrBfAH_PUcV6Snti=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1Jmm86l7v39aJZ9m5qoFN8QFJeNzR1_He=w1920-h1920-rw',
-  ],
-  'Baby Shoot': [
-    'https://lh3.googleusercontent.com/d/1x1Lyy4Jws9R-8Vn97LtSAnqDi68bJ0lS=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1Cvs4BN2_noXfZKUzJGct_NbXfYhm7b8N=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1Mig32inBRvaW0b8irWLLbFLwaSAw5rMd=w1920-h1920-rw',
-  ],
-  'Birthday': [
-    'https://lh3.googleusercontent.com/d/1of5XyYcBBxXCgtwHkOWnMC_osbPRNDh_=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/12Lz4DHXX7cb1O-sKIhfvcoyXJhBfA-FB=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/15AjQDGkrNw_S7RSiwksCwHw4PuRhpdNu=w1920-h1920-rw',
-  ],
-  'Naming Ceremony': [
-    'https://lh3.googleusercontent.com/d/1oic_LqSXfjCBg6GVviFBP25iuNr6vRP6=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1ZPZIfyW7XkdeWFLM3Xh8WPS0BF7rvkvZ=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/15eiWuH14D2i3YC1EJGZgQMsutz1b_fjV=w1920-h1920-rw',
-  ],
-  'Upanayana': [
-    'https://lh3.googleusercontent.com/d/1Zf3dSloPnOSZKlkqqaVhhlheueUvQ_e2=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1jMHuooWIwouCRzcARKbFWP0r2CXMVua1=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1FcMwFt7TP2Xg1oiOlVnO6XR5jQe65SLt=w1920-h1920-rw',
-  ],
-  'House Warming': [
-    'https://lh3.googleusercontent.com/d/1OdYgKpy2sNyecbSanUIlQJNey4WBB1Qd=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1x5UajY_YtLIg1NUBsJ_zCwWF9NwonXZ3=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1xGIbNfysqLfVRToOOYTSipxKa2Q3ifDh=w1920-h1920-rw',
-  ],
-  'Portfolio Shoot': [
-    'https://lh3.googleusercontent.com/d/16yMHqYKS6MuoTxr9tgbYwCJnnFEq8hTc=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1LqhzXjVFi9H-5oNRGQ6hoKjoISb1aIP6=w1920-h1920-rw',
-    'https://lh3.googleusercontent.com/d/1t0qpOcu9KqPG_iYE5SzyFKJ2eNHu-Egw=w1920-h1920-rw',
-  ],
-  // 'Mehndi': [
-  //   'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1200&h=1200&fit=crop',
-  //   'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&h=1200&fit=crop',
-  //   'https://images.unsplash.com/photo-1543968996-1a2ba4d876f1?w=1200&h=1200&fit=crop',
-  // ],
-};
-
 const PHONE_NUMBER = '6363967683';
 const WHATSAPP_MESSAGE = 'Hi! I would like to get a quick quote for photography services.';
 
@@ -838,7 +790,6 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedService, setSelectedService] = useState('all');
   const [selectedServiceType, setSelectedServiceType] = useState('all');
-  const [hoveredService, setHoveredService] = useState<string | null>(null);
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
 
   const backgroundImages = [
@@ -1412,6 +1363,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {filteredServices.map((service, idx) => {
+              const defaultServiceIcon = '/images/service-placeholder.svg';
               const serviceIcons: Record<string, string> = {
                 'Weddings': 'https://photocrewpictures.com/pics/services/pht2.png',
                 'Hamarlok Weddings': 'https://photocrewpictures.com/pics/services/hamarlok.png',
@@ -1426,7 +1378,7 @@ export default function Home() {
                 'Upanayana': 'https://photocrewpictures.com/pics/services/upanayana.png',
                 'House Warming': 'https://photocrewpictures.com/pics/services/house_warming.webp',
                 'Portfolio Shoot': 'https://photocrewpictures.com/pics/services/portfolio.png',
-                // 'Mehndi': 'https://img.icons8.com/fluency/96/000000/henna.png',
+                'Mehndi': '/images/mehndi-icon.png',
                 'Product Shoot': 'https://photocrewpictures.com/pics/services/product_shoot.png',
                 'Corporate Events': 'https://photocrewpictures.com/pics/services/corporate_events.png',
                 'Car/Bike Delivery Shoot': 'https://photocrewpictures.com/pics/services/caricon.png',
@@ -1441,43 +1393,25 @@ export default function Home() {
                 <div 
                   key={idx} 
                   className={`service-card ${animationClass} text-center cursor-pointer group relative`}
-                  onMouseEnter={() => setHoveredService(service.name)}
-                  onMouseLeave={() => setHoveredService(null)}
                   onClick={() => {
                     const queryValue = service.query || service.name;
                     window.location.href = `/dashboard/gallery?service=${encodeURIComponent(queryValue)}`;
                   }}
                 >
-                  {/* Hover Preview */}
-                  {hoveredService === service.name && SERVICE_PREVIEW_IMAGES[service.name] && (
-                    <div className="absolute inset-0 z-40 rounded-lg overflow-hidden">
-                      <div className="grid grid-cols-3 gap-0 h-full">
-                        {SERVICE_PREVIEW_IMAGES[service.name].map((imgUrl, imgIdx) => (
-                          <div key={imgIdx} className="relative overflow-hidden">
-                            <img
-                              src={imgUrl}
-                              alt={`${service.name} preview ${imgIdx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <span className="text-white font-semibold text-xs sm:text-sm px-2 text-center">Click to View Gallery</span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Default View */}
-                  <div className={`service-box bg-gray-900 rounded-lg p-6 mb-4 flex items-center justify-center h-32 border border-gray-800 transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>
-                    {serviceIcons[service.name] ? (
-                      <img src={serviceIcons[service.name]} alt={service.name} className="service-icon w-20 h-20 object-contain transition-all duration-300" />
-                    ) : (
-                      <div className="w-20 h-20" />
-                    )}
+                  <div className={`service-box ${service.name === 'Mehndi' ? 'bg-[#07111b] border-blue-950' : 'bg-gray-900 border-gray-800'} rounded-lg p-6 mb-4 flex items-center justify-center h-32 border transition-all duration-300 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-400/20`}>
+                    <img
+                      src={serviceIcons[service.name] || defaultServiceIcon}
+                      alt={service.name}
+                      className="service-icon w-20 h-20 object-cover transition-all duration-300"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (target.src !== defaultServiceIcon) {
+                          target.src = defaultServiceIcon;
+                        }
+                      }}
+                    />
                   </div>
-                  <p className={`text-white font-semibold transition-opacity duration-300 ${hoveredService === service.name ? 'opacity-0' : 'opacity-100'}`}>{service.name}</p>
+                  <p className="text-white font-semibold">{service.name}</p>
                 </div>
               );
             })}
