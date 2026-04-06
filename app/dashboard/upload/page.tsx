@@ -97,44 +97,70 @@ export default function UploadPage() {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const view = new DataView(e.target?.result as ArrayBuffer);
-        if (view.getUint16(0, false) !== 0xFFD8) {
-          resolve(1); // Not a JPEG
-          return;
-        }
+        try {
+          const view = new DataView(e.target?.result as ArrayBuffer);
+          const length = view.byteLength;
 
-        const length = view.byteLength;
-        let offset = 2;
+          // Check minimum length for JPEG header
+          if (length < 2 || view.getUint16(0, false) !== 0xFFD8) {
+            resolve(1); // Not a JPEG
+            return;
+          }
 
-        while (offset < length) {
-          if (view.getUint16(offset + 2, false) <= 8) break;
-          const marker = view.getUint16(offset, false);
-          offset += 2;
+          let offset = 2;
 
-          if (marker === 0xFFE1) {
-            if (view.getUint32(offset + 2, false) !== 0x45786966) {
-              resolve(1);
-              return;
-            }
-
-            const little = view.getUint16(offset + 8, false) === 0x4949;
-            offset += view.getUint16(offset, false);
-            const tags = view.getUint16(offset, little);
+          while (offset < length - 8) {
+            // Bounds check before reading marker
+            if (offset + 4 > length) break;
+            if (view.getUint16(offset + 2, false) <= 8) break;
+            const marker = view.getUint16(offset, false);
             offset += 2;
 
-            for (let i = 0; i < tags; i++) {
-              if (view.getUint16(offset + i * 12, little) === 0x0112) {
-                resolve(view.getUint16(offset + i * 12 + 8, little));
+            if (marker === 0xFFE1) {
+              // Bounds check before reading EXIF header
+              if (offset + 6 > length) break;
+              if (view.getUint32(offset + 2, false) !== 0x45786966) {
+                resolve(1);
                 return;
               }
+
+              // Bounds check before reading byte order
+              if (offset + 10 > length) break;
+              const little = view.getUint16(offset + 8, false) === 0x4949;
+              
+              // Bounds check before reading segment length
+              if (offset + 2 > length) break;
+              const segmentLength = view.getUint16(offset, false);
+              offset += segmentLength;
+
+              // Bounds check before reading tag count
+              if (offset + 2 > length) break;
+              const tags = view.getUint16(offset, little);
+              offset += 2;
+
+              // Safely iterate through tags with bounds checking
+              for (let i = 0; i < tags; i++) {
+                // Check if we can read the tag ID and value
+                if (offset + i * 12 + 10 > length) break;
+                
+                if (view.getUint16(offset + i * 12, little) === 0x0112) {
+                  resolve(view.getUint16(offset + i * 12 + 8, little));
+                  return;
+                }
+              }
+            } else if ((marker & 0xFF00) !== 0xFF00) {
+              break;
+            } else {
+              // Bounds check before reading segment length
+              if (offset + 2 > length) break;
+              offset += view.getUint16(offset, false);
             }
-          } else if ((marker & 0xFF00) !== 0xFF00) {
-            break;
-          } else {
-            offset += view.getUint16(offset, false);
           }
+          resolve(1);
+        } catch (error) {
+          console.error('Error reading EXIF:', error);
+          resolve(1); // Default to 1 if error occurs
         }
-        resolve(1);
       };
       reader.readAsArrayBuffer(file.slice(0, 65536)); // Read first 64KB for EXIF
     });

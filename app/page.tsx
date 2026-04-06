@@ -1110,7 +1110,7 @@ export default function Home() {
         <img
           src={backgroundImages[currentBgIndex]}
           alt="Background"
-          className="absolute inset-0 w-full h-full object-contain transition-opacity duration-2000"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-2000"
           style={{ opacity: bgOpacity, animation: 'zoom 10s ease-in-out infinite' }}
           onError={() => {
             console.log('Background image failed to load:', backgroundImages[currentBgIndex]);
@@ -1169,7 +1169,8 @@ export default function Home() {
                   alt={`Gallery ${idx + 1}`}
                   width={600}
                   height={600}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="block w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+                  style={{ objectPosition: 'top center' }}
                   priority={idx < 3}
                   unoptimized={true}
                   sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
