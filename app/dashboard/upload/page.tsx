@@ -201,6 +201,13 @@ export default function UploadPage() {
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
+        // Draw dimensions must be swapped for rotated images (orientations 5-8)
+        let drawWidth = width;
+        let drawHeight = height;
+        if (orientation > 4) {
+          [drawWidth, drawHeight] = [height, width];
+        }
+
         // Apply transformations based on EXIF orientation
         ctx.save();
         switch (orientation) {
@@ -239,7 +246,7 @@ export default function UploadPage() {
             break;
         }
 
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
         ctx.restore();
 
         // If file is small, keep high quality; only compress if needed
