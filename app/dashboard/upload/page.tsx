@@ -15,7 +15,7 @@ export default function UploadPage() {
   const [photographer, setPhotographer] = useState<Photographer | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [type, setType] = useState<'image' | 'video'>('image');
-  const [section, setSection] = useState<'home' | 'gallery'>('gallery');
+  const [section, setSection] = useState<'home' | 'gallery' | 'recent-work'>('gallery');
   const [service, setService] = useState('Pre-Wedding');
   const [eventName, setEventName] = useState('');
   const [eventNames, setEventNames] = useState<string[]>([]);
@@ -352,8 +352,8 @@ export default function UploadPage() {
         formData.append('file', files[i]);
         formData.append('type', type);
         formData.append('section', section);
-        formData.append('service', service);
-        formData.append('eventName', eventName);
+        formData.append('service', section === 'recent-work' ? '' : service);
+        formData.append('eventName', section === 'recent-work' ? '' : eventName);
 
         try {
           const response = await fetch('/api/upload', {
@@ -437,6 +437,29 @@ export default function UploadPage() {
 
         <h1 className="text-4xl font-bold text-white mb-8">Upload Media</h1>
         
+        {/* Navigation Back Buttons */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <Link
+            href="/"
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition border border-slate-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
+          </Link>
+          
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition border border-slate-600"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+          </Link>
+        </div>
+        
         <form onSubmit={handleSubmit} className="bg-slate-800 rounded-lg shadow-lg p-8">
           {/* Media Type Selection */}
           <div className="mb-6">
@@ -480,64 +503,69 @@ export default function UploadPage() {
             <label className="block text-white font-semibold mb-4">Display Section</label>
             <select
               value={section}
-              onChange={(e) => setSection(e.target.value as 'home' | 'gallery')}
+              onChange={(e) => setSection(e.target.value as 'home' | 'gallery' | 'recent-work')}
               className="w-full bg-slate-700 text-white px-4 py-3 rounded mb-4 border border-slate-600 focus:border-amber-600 focus:outline-none"
             >
               <option value="gallery">Gallery (default)</option>
               <option value="home">Home</option>
+              <option value="recent-work">Recent Work</option>
             </select>
           </div>
 
           {/* Service Type Selection */}
-          <div className="mb-6">
-            <label className="block text-white font-semibold mb-4">Service Type</label>
-            <select
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-              className="w-full bg-slate-700 text-white px-4 py-3 rounded mb-4 border border-slate-600 focus:border-amber-600 focus:outline-none"
-            >
-              {services.map((svc) => (
-                <option key={svc} value={svc}>
-                  {svc}
-                </option>
-              ))}
-            </select>
-          </div>
+          {section !== 'recent-work' && (
+            <div className="mb-6">
+              <label className="block text-white font-semibold mb-4">Service Type</label>
+              <select
+                value={service}
+                onChange={(e) => setService(e.target.value)}
+                className="w-full bg-slate-700 text-white px-4 py-3 rounded mb-4 border border-slate-600 focus:border-amber-600 focus:outline-none"
+              >
+                {services.map((svc) => (
+                  <option key={svc} value={svc}>
+                    {svc}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Event/Couple Name */}
-          <div className="mb-6">
-            <label className="block text-white font-semibold mb-4">
-              Event Name (e.g., "Arjun & Jasmeet" or "Wedding Reception")
-            </label>
-            <input
-              list="event-names"
-              type="text"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              placeholder="Select or enter couple/event name..."
-              className="w-full bg-slate-700 text-white px-4 py-3 rounded border border-slate-600 focus:border-amber-600 focus:outline-none"
-            />
-            <datalist id="event-names">
-              {eventNames.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-            <p className="text-gray-400 text-sm mt-2">
-              Choose an existing event name or type a new one to create a new group.
-            </p>
-          </div>
+          {section !== 'recent-work' && (
+            <div className="mb-6">
+              <label className="block text-white font-semibold mb-4">
+                Event Name (e.g., "Arjun & Jasmeet" or "Wedding Reception")
+              </label>
+              <input
+                list="event-names"
+                type="text"
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+                placeholder="Select or enter couple/event name..."
+                className="w-full bg-slate-700 text-white px-4 py-3 rounded border border-slate-600 focus:border-amber-600 focus:outline-none"
+              />
+              <datalist id="event-names">
+                {eventNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+              <p className="text-gray-400 text-sm mt-2">
+                Choose an existing event name or type a new one to create a new group.
+              </p>
+            </div>
+          )}
 
           {/* File Input */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-4">
-              Choose {type === 'image' ? 'Image' : 'Video'} Files (Multiple Allowed)
+              Choose {type === 'image' ? 'Image' : 'Video'} {section === 'recent-work' ? 'File' : 'Files (Multiple Allowed)'}
             </label>
             <div className="border-2 border-dashed border-amber-600 rounded-lg p-8 text-center cursor-pointer hover:border-amber-400 hover:bg-amber-950 transition-all">
               <input
                 type="file"
                 onChange={handleFileChange}
                 accept={type === 'image' ? 'image/*' : 'video/*'}
-                multiple
+                multiple={section !== 'recent-work'}
                 className="w-full cursor-pointer"
               />
               {files.length > 0 && (

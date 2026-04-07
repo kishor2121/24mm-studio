@@ -986,6 +986,12 @@ export default function Home() {
               Gallery
             </Link>
             <Link 
+              href="/dashboard/recent-work"
+              className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide"
+            >
+              Recent Work
+            </Link>
+            <Link 
               href="/dashboard/gallery"
               className="hover:text-amber-500 transition text-xs lg:text-sm uppercase tracking-wide"
             >
@@ -1053,6 +1059,9 @@ export default function Home() {
               </Link>
               <Link href="/dashboard/gallery" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
                 Gallery
+              </Link>
+              <Link href="/dashboard/recent-work" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
+                Recent Work
               </Link>
               <Link href="/dashboard/gallery" className="block hover:text-amber-500 transition text-sm uppercase tracking-wide py-2">
                 Films
