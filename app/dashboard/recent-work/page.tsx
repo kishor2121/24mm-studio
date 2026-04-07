@@ -85,7 +85,7 @@ export default function RecentWorkPage() {
             {images.map((image, index) => (
               <div
                 key={image.id}
-                className="relative overflow-hidden cursor-pointer aspect-square w-full bg-gray-900"
+                className="relative overflow-hidden cursor-pointer aspect-[4/3] w-full bg-gray-900"
                 onClick={() => setSelectedImageIndex(index)}
               >
                 <NextImage
@@ -93,7 +93,7 @@ export default function RecentWorkPage() {
                   alt="Recent Work"
                   fill
                   unoptimized={true}
-                  className="block w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                  className="block w-full h-full object-contain object-center transition-transform duration-500 hover:scale-105"
                   sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                   loading={index < 3 ? 'eager' : 'lazy'}
                 />
