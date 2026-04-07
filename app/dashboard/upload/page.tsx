@@ -178,75 +178,51 @@ export default function UploadPage() {
         if (!ctx) return resolve(file);
 
         const maxDimension = 1920;
-        let { width, height } = img;
+        const sourceWidth = img.naturalWidth;
+        const sourceHeight = img.naturalHeight;
 
-        // Adjust dimensions based on orientation
-        let canvasWidth = width;
-        let canvasHeight = height;
+        const scale = Math.min(1, maxDimension / sourceWidth, maxDimension / sourceHeight);
+        const targetWidth = Math.round(sourceWidth * scale);
+        const targetHeight = Math.round(sourceHeight * scale);
 
-        // For orientations 5-8, we need to swap width and height
+        let canvasWidth = targetWidth;
+        let canvasHeight = targetHeight;
         if (orientation > 4) {
-          [canvasWidth, canvasHeight] = [canvasHeight, canvasWidth];
-        }
-
-        // Scale down if necessary
-        if (canvasWidth > maxDimension || canvasHeight > maxDimension) {
-          const ratio = Math.min(maxDimension / canvasWidth, maxDimension / canvasHeight);
-          canvasWidth = Math.round(canvasWidth * ratio);
-          canvasHeight = Math.round(canvasHeight * ratio);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
+          [canvasWidth, canvasHeight] = [targetHeight, targetWidth];
         }
 
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
-        // Draw dimensions must be swapped for rotated images (orientations 5-8)
-        let drawWidth = width;
-        let drawHeight = height;
-        if (orientation > 4) {
-          [drawWidth, drawHeight] = [height, width];
-        }
-
-        // Apply transformations based on EXIF orientation
         ctx.save();
         switch (orientation) {
           case 2:
-            ctx.scale(-1, 1);
-            ctx.translate(-canvasWidth, 0);
+            ctx.setTransform(-1, 0, 0, 1, canvasWidth, 0);
             break;
           case 3:
-            ctx.scale(-1, -1);
-            ctx.translate(-canvasWidth, -canvasHeight);
+            ctx.setTransform(-1, 0, 0, -1, canvasWidth, canvasHeight);
             break;
           case 4:
-            ctx.scale(1, -1);
-            ctx.translate(0, -canvasHeight);
+            ctx.setTransform(1, 0, 0, -1, 0, canvasHeight);
             break;
           case 5:
-            ctx.scale(-1, 1);
-            ctx.rotate(Math.PI / 2);
-            ctx.translate(-canvasWidth, 0);
+            ctx.setTransform(0, 1, 1, 0, 0, 0);
             break;
           case 6:
-            ctx.rotate(Math.PI / 2);
-            ctx.translate(0, -canvasWidth);
+            ctx.setTransform(0, 1, -1, 0, canvasHeight, 0);
             break;
           case 7:
-            ctx.scale(-1, 1);
-            ctx.rotate(-Math.PI / 2);
-            ctx.translate(-canvasHeight, -canvasWidth);
+            ctx.setTransform(0, -1, -1, 0, canvasHeight, canvasWidth);
             break;
           case 8:
-            ctx.rotate(-Math.PI / 2);
-            ctx.translate(-canvasHeight, 0);
+            ctx.setTransform(0, -1, 1, 0, 0, canvasWidth);
             break;
           default:
-            // Orientation 1: no transformation needed
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             break;
         }
 
-        ctx.drawImage(img, 0, 0, drawWidth, drawHeight);
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
         ctx.restore();
 
         // If file is small, keep high quality; only compress if needed
