@@ -37,6 +37,8 @@ function GalleryContent() {
   const [videos, setVideos] = useState<MediaItem[]>([]);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxItems, setLightboxItems] = useState<MediaItem[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewText, setReviewText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -139,9 +141,19 @@ function GalleryContent() {
     images: imgs,
   }));
 
-  const handleMediaClick = async (item: MediaItem, type: 'image' | 'video') => {
+  const handleMediaClick = async (item: MediaItem, type: 'image' | 'video', allItems?: MediaItem[]) => {
     setSelectedMedia(item);
     setMediaType(type);
+    
+    // Set lightbox items and find current index
+    if (allItems) {
+      const itemIndex = allItems.findIndex(i => i.id === item.id);
+      setLightboxItems(allItems);
+      setLightboxIndex(itemIndex >= 0 ? itemIndex : 0);
+    } else {
+      setLightboxItems([item]);
+      setLightboxIndex(0);
+    }
     
     // Fetch reviews for this media
     try {
@@ -169,9 +181,18 @@ function GalleryContent() {
         },
       });
 
+      const errorData = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Delete failed');
+        console.error('Delete image failed:', errorData.message || errorData);
+
+        if (errorData.message === 'Image not found') {
+          // If the image was already deleted in the backend, remove it from local UI state too.
+          setImages((prev) => prev.filter((img) => img.id !== imageId));
+          setSelectedMedia((prev) => (prev?.id === imageId ? null : prev));
+        }
+
+        alert(errorData.message || 'Could not delete image. Please try again.');
+        return;
       }
 
       // remove deleted image from state
@@ -300,17 +321,18 @@ function GalleryContent() {
                 {filteredImages.map((item, idx) => (
                   <div
                     key={item.id}
-                    className={`group relative overflow-hidden aspect-video rounded-none transition-all duration-500 cursor-pointer ${
+                    onClick={() => handleMediaClick(item, 'image', filteredImages)}
+                    className={`group relative overflow-hidden rounded-none transition-all duration-500 cursor-pointer flex items-center justify-center bg-black ${
                       selectedMedia?.id === item.id
                         ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-black'
                         : 'ring-1 ring-gray-800 hover:ring-amber-400'
                     }`}
+                    style={{ minHeight: '60vh' }}
                   >
                     <img
                       src={item.url}
                       alt="Gallery item"
-                      className="w-full h-full object-contain bg-black transition-transform duration-500"
-                      onClick={() => handleMediaClick(item, 'image')}
+                      className="max-w-full max-h-full object-contain object-center transition-transform duration-500"
                     />
 
                     {photographer && photographer.id === item.photographerId && (
@@ -327,6 +349,11 @@ function GalleryContent() {
                     )}
 
                     <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="bg-black/70 text-white text-sm sm:text-base px-4 py-2 rounded-lg font-semibold tracking-wide">
+                        Click to preview
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -339,20 +366,32 @@ function GalleryContent() {
                 <div
                   key={event.eventName}
                   onClick={() => setSelectedEvent(event.eventName)}
-                  className="group relative overflow-hidden aspect-square rounded-none transition-all duration-500 cursor-pointer ring-1 ring-gray-800 hover:ring-amber-400"
+                  className="group relative overflow-hidden rounded-none transition-all duration-500 cursor-pointer flex items-center justify-center bg-black ring-1 ring-gray-800 hover:ring-amber-400"
+                  style={{ minHeight: '40vh' }}
                 >
                   <img
                     src={event.cover.url}
                     alt={event.eventName}
-                    className="w-full h-full object-contain bg-black transition-transform duration-500"
+                    className="max-w-full max-h-full object-contain object-center transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-2 sm:p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-between p-2 sm:p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="bg-black/50 rounded-lg p-2 sm:p-4">
                       <h3 className="text-white font-bold text-sm sm:text-xl tracking-wide truncate">{event.eventName}</h3>
                       <p className="text-gray-200 text-xs sm:text-sm mt-1">
                         {event.count} photos • {event.service}
                       </p>
-                      <p className="text-gray-300 text-xs mt-1">Click to view all</p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMediaClick(event.cover, 'image', event.images);
+                        }}
+                        className="bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm uppercase tracking-wide font-semibold px-3 py-2 rounded transition"
+                      >
+                        Preview
+                      </button>
+                      <span className="text-amber-200 text-xs sm:text-sm font-semibold">Hover to preview event photos</span>
                     </div>
                   </div>
                 </div>
@@ -360,6 +399,69 @@ function GalleryContent() {
             </div>
           )}
         </div>
+
+        {/* Lightbox Modal */}
+        {lightboxIndex !== null && lightboxItems.length > 0 && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            {/* Close Button */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 text-white hover:text-amber-500 text-3xl font-bold transition z-60"
+            >
+              ✕
+            </button>
+
+            {/* Image Counter */}
+            <div className="absolute top-4 left-4 text-white font-semibold text-lg bg-black/50 px-4 py-2 rounded">
+              {lightboxIndex + 1} of {lightboxItems.length}
+            </div>
+
+            {/* Main Image */}
+            <div className="relative w-full h-full max-w-5xl max-h-[85vh] flex items-center justify-center">
+              <img
+                src={lightboxItems[lightboxIndex]?.url}
+                alt={`Gallery ${lightboxIndex + 1}`}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            {/* Previous Button */}
+            <button
+              onClick={() =>
+                setLightboxIndex(
+                  (lightboxIndex - 1 + lightboxItems.length) % lightboxItems.length
+                )
+              }
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 transition shadow-lg z-60"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={() =>
+                setLightboxIndex((lightboxIndex + 1) % lightboxItems.length)
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 transition shadow-lg z-60"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

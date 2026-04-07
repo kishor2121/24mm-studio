@@ -805,6 +805,7 @@ export default function Home() {
   ];
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [bgOpacity, setBgOpacity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const galleryServices = ['all', 'Wedding', 'Engagement', 'Pre-Wedding', 'Maternity', 'Baby Shower', 'Mehndi', 'Portfolio', 'Corporate Events'];
   
@@ -1150,27 +1151,27 @@ export default function Home() {
       </section>
 
       {/* Gallery Grid Section - Show all uploaded images (or fallbacks) */}
-      <section className="py-12 sm:py-20 bg-black relative">
-        <div className="w-full px-0">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-2 uppercase tracking-wide text-white">
+      <section className="py-12 sm:py-20 bg-black relative p-0">
+        <div className="w-full px-0 m-0">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-2 uppercase tracking-wide text-white px-4">
           </h2>
-          <p className="text-center text-gray-400 mb-8 text-lg">
+          <p className="text-center text-gray-400 mb-8 text-lg px-4">
             Explore our latest photography and videography work
           </p>
 
-          <div className="grid grid-cols-3 gap-0 auto-rows-max">
+          <div className="grid grid-cols-3 gap-0 auto-rows-max w-full">
             {HOMESHOW_IMAGES.map((url, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden cursor-pointer aspect-square w-full bg-gray-800"
+                className="group relative overflow-hidden cursor-pointer aspect-square w-full bg-gray-800 flex items-center justify-center hover:ring-2 hover:ring-amber-500 transition-all"
+                onClick={() => setSelectedImageIndex(idx)}
               >
                 <NextImage
                   src={url}
                   alt={`Gallery ${idx + 1}`}
                   width={600}
                   height={600}
-                  className="block w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
-                  style={{ objectPosition: 'top center' }}
+                  className="block w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                   priority={idx < 3}
                   unoptimized={true}
                   sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
@@ -1183,6 +1184,53 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Gallery Lightbox Modal */}
+      {selectedImageIndex !== null && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedImageIndex(null)}
+            className="absolute top-4 right-4 text-white hover:text-amber-500 text-3xl font-bold transition z-60"
+          >
+            ✕
+          </button>
+
+          {/* Image Counter */}
+          <div className="absolute top-4 left-4 text-white font-semibold text-lg bg-black/50 px-4 py-2 rounded">
+            {selectedImageIndex + 1} of {HOMESHOW_IMAGES.length}
+          </div>
+
+          {/* Main Image */}
+          <div className="relative w-full h-full max-w-5xl max-h-[85vh] flex items-center justify-center">
+            <img
+              src={HOMESHOW_IMAGES[selectedImageIndex]}
+              alt={`Gallery ${selectedImageIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+
+          {/* Previous Button */}
+          <button
+            onClick={() => setSelectedImageIndex((selectedImageIndex - 1 + HOMESHOW_IMAGES.length) % HOMESHOW_IMAGES.length)}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 transition shadow-lg z-60"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Next Button */}
+          <button
+            onClick={() => setSelectedImageIndex((selectedImageIndex + 1) % HOMESHOW_IMAGES.length)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber-600 hover:bg-amber-700 text-white rounded-full p-3 transition shadow-lg z-60"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Features Section */}
       <section className="py-12 sm:py-20 bg-gray-950 relative">
