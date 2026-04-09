@@ -197,25 +197,25 @@ export default function UploadPage() {
         ctx.save();
         switch (orientation) {
           case 2:
-            ctx.setTransform(-1, 0, 0, 1, canvasWidth, 0);
+            ctx.setTransform(-1, 0, 0, 1, targetWidth, 0);
             break;
           case 3:
-            ctx.setTransform(-1, 0, 0, -1, canvasWidth, canvasHeight);
+            ctx.setTransform(-1, 0, 0, -1, targetWidth, targetHeight);
             break;
           case 4:
-            ctx.setTransform(1, 0, 0, -1, 0, canvasHeight);
+            ctx.setTransform(1, 0, 0, -1, 0, targetHeight);
             break;
           case 5:
             ctx.setTransform(0, 1, 1, 0, 0, 0);
             break;
           case 6:
-            ctx.setTransform(0, 1, -1, 0, canvasHeight, 0);
+            ctx.setTransform(0, 1, -1, 0, targetWidth, 0);
             break;
           case 7:
-            ctx.setTransform(0, -1, -1, 0, canvasHeight, canvasWidth);
+            ctx.setTransform(0, -1, -1, 0, targetWidth, targetHeight);
             break;
           case 8:
-            ctx.setTransform(0, -1, 1, 0, 0, canvasWidth);
+            ctx.setTransform(0, -1, 1, 0, 0, targetHeight);
             break;
           default:
             ctx.setTransform(1, 0, 0, 1, 0, 0);

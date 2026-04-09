@@ -17,6 +17,8 @@ export default function RecentWorkPage() {
   const [images, setImages] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [photographer, setPhotographer] = useState<{ id: number; name: string } | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     const loadRecentWork = async () => {
@@ -35,9 +37,60 @@ export default function RecentWorkPage() {
     };
 
     loadRecentWork();
+
+    const stored = localStorage.getItem('photographer');
+    if (stored) {
+      try {
+        setPhotographer(JSON.parse(stored));
+      } catch {
+        // ignore
+      }
+    }
   }, []);
 
   const selectedImage = selectedImageIndex !== null ? images[selectedImageIndex] : null;
+
+  const handleDeleteImage = async (imageId: number, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    
+    if (!photographer) return;
+    if (!confirm('Are you sure you want to delete this image?')) return;
+
+    setDeleting(imageId);
+    try {
+      const response = await fetch(`/api/images?id=${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-photographer': JSON.stringify(photographer),
+        },
+      });
+
+      const errorData = await response.json();
+      if (!response.ok) {
+        console.error('Delete image failed:', errorData.message || errorData);
+
+        if (errorData.message === 'Image not found') {
+          setImages((prev) => prev.filter((img) => img.id !== imageId));
+          setSelectedImageIndex(null);
+        }
+
+        alert(errorData.message || 'Could not delete image. Please try again.');
+        return;
+      }
+
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+      if (selectedImageIndex !== null) {
+        setSelectedImageIndex(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      alert('Could not delete image. Please try again.');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -81,22 +134,29 @@ export default function RecentWorkPage() {
             <p className="text-gray-400">Please come back later.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-0 auto-rows-max w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full px-4 sm:px-6">
             {images.map((image, index) => (
               <div
                 key={image.id}
-                className="relative overflow-hidden cursor-pointer aspect-[4/3] w-full bg-gray-900"
+                className="relative overflow-hidden cursor-pointer bg-gray-900 group rounded-lg"
                 onClick={() => setSelectedImageIndex(index)}
               >
-                <NextImage
+                <img
                   src={image.url}
                   alt="Recent Work"
-                  fill
-                  unoptimized={true}
-                  className="block w-full h-full object-contain object-center transition-transform duration-500 hover:scale-105"
-                  sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
-                  loading={index < 3 ? 'eager' : 'lazy'}
+                  className="block w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading={index < 6 ? 'eager' : 'lazy'}
                 />
+                {photographer && photographer.id === image.photographerId && (
+                  <button
+                    onClick={(e) => handleDeleteImage(image.id, e)}
+                    disabled={deleting === image.id}
+                    className="absolute top-2 right-2 z-20 rounded-full bg-black/60 p-2 text-white hover:bg-red-600 disabled:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
+                    title="Delete image"
+                  >
+                    🗑️
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -106,12 +166,28 @@ export default function RecentWorkPage() {
       {selectedImage && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex flex-col items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30" />
-          <button
-            onClick={() => setSelectedImageIndex(null)}
-            className="relative z-10 self-end text-white bg-black/70 rounded-full p-3 hover:bg-black transition"
-          >
-            ✕
-          </button>
+          <div className="relative z-10 flex items-center gap-3 self-end mb-4">
+            {photographer && photographer.id === selectedImage.photographerId && (
+              <button
+                onClick={() => {
+                  const id = selectedImage.id;
+                  setSelectedImageIndex(null);
+                  handleDeleteImage(id);
+                }}
+                disabled={deleting === selectedImage.id}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-full p-3 transition"
+                title="Delete image"
+              >
+                {deleting === selectedImage.id ? '...' : '🗑️'}
+              </button>
+            )}
+            <button
+              onClick={() => setSelectedImageIndex(null)}
+              className="bg-black/70 hover:bg-black rounded-full p-3 transition text-white"
+            >
+              ✕
+            </button>
+          </div>
           <div className="relative z-10 w-full max-w-6xl h-full max-h-[90vh]">
             <div className="mb-4 text-center">
               <p className="text-sm sm:text-base uppercase tracking-[0.55em] text-amber-300">K A R T H I K F R A M E S</p>

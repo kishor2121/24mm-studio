@@ -50,6 +50,7 @@ function GalleryContent() {
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [selectedServiceType, setSelectedServiceType] = useState<string>('');
   const [photographer, setPhotographer] = useState<{ id: number; name: string } | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<string | null>(null);
 
   const displayImages = images.length > 0 ? images : DUMMY_GALLERY;
   const usingDefault = !loading && images.length === 0;
@@ -204,6 +205,38 @@ function GalleryContent() {
     }
   };
 
+  const handleDeleteEvent = async (eventName: string) => {
+    if (!photographer) return;
+    if (!confirm(`Delete all photos from "${eventName}"? This cannot be undone.`)) return;
+
+    setDeletingEvent(eventName);
+    try {
+      const eventImages = images.filter(img => (img.eventName || 'Others') === eventName);
+      const deletePromises = eventImages.map(img =>
+        fetch(`/api/images?id=${img.id}`, {
+          method: 'DELETE',
+          headers: { 'x-photographer': JSON.stringify(photographer) },
+        })
+      );
+
+      const results = await Promise.all(deletePromises);
+      const allSuccess = results.every(res => res.ok);
+
+      if (allSuccess) {
+        setImages((prev) => prev.filter(img => (img.eventName || 'Others') !== eventName));
+        setSelectedEvent('');
+        setSelectedMedia(null);
+      } else {
+        alert('Some images could not be deleted. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      alert('Could not delete event. Please try again.');
+    } finally {
+      setDeletingEvent(null);
+    }
+  };
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -309,12 +342,23 @@ function GalleryContent() {
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-white">{selectedEvent}</h2>
                 <p className="text-gray-300 text-sm">{filteredImages.length} photos</p>
-                <button
-                  onClick={() => setSelectedEvent('')}
-                  className="mt-4 px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded text-white font-semibold"
-                >
-                  Back to Events
-                </button>
+                <div className="flex gap-3 justify-center mt-4 flex-wrap">
+                  <button
+                    onClick={() => setSelectedEvent('')}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded text-white font-semibold"
+                  >
+                    Back to Events
+                  </button>
+                  {photographer && (
+                    <button
+                      onClick={() => handleDeleteEvent(selectedEvent)}
+                      disabled={deletingEvent === selectedEvent}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded text-white font-semibold transition"
+                    >
+                      {deletingEvent === selectedEvent ? 'Deleting...' : '🗑️ Delete Event'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="sm:max-w-2xl sm:mx-auto grid grid-cols-1 gap-4">
@@ -382,16 +426,31 @@ function GalleryContent() {
                       </p>
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMediaClick(event.cover, 'image', event.images);
-                        }}
-                        className="bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm uppercase tracking-wide font-semibold px-3 py-2 rounded transition"
-                      >
-                        Preview
-                      </button>
-                      <span className="text-amber-200 text-xs sm:text-sm font-semibold">Hover to preview event photos</span>
+                      <div className="flex gap-2 items-center">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMediaClick(event.cover, 'image', event.images);
+                          }}
+                          className="bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm uppercase tracking-wide font-semibold px-3 py-2 rounded transition"
+                        >
+                          Preview
+                        </button>
+                        {photographer && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteEvent(event.eventName);
+                            }}
+                            disabled={deletingEvent === event.eventName}
+                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white text-xs sm:text-sm uppercase tracking-wide font-semibold px-2 py-2 rounded transition"
+                            title="Delete entire event"
+                          >
+                            {deletingEvent === event.eventName ? '...' : '🗑️'}
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-amber-200 text-xs sm:text-sm font-semibold">See All Photos</span>
                     </div>
                   </div>
                 </div>
